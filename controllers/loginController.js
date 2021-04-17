@@ -1,5 +1,5 @@
 var jwt = require('jsonwebtoken');  //generate a access token so all other end points can be secure.
-var User = require('../models/user'); //User model so
+var User = require('../models/userModel'); //User model so
 var config = require('../config/config');  //load configuration parameters.
 
 exports.login = function (req, res) {
