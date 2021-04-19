@@ -1,9 +1,8 @@
-var jwt = require('jsonwebtoken');  //generate a access token so all other end points can be secure.
-var User = require('../models/userModel'); //User model so
-var config = require('../config/config');  //load configuration parameters.
+var jwt = require('jsonwebtoken');
+var User = require('../models/userModel');
+var config = require('../config/config');
 
 exports.login = function (req, res) {
-    console.log("Log")
     User.findOne({ username: req.body.email }, function (err, user) {
 
         if (err) {
@@ -15,22 +14,14 @@ exports.login = function (req, res) {
         } else if (user) {
 
             if (!user.comparePassword(req.body.password)) {
-                res.json({success: false,statusCode: 403,errorMessage: 'Authentication failed. Wrong password.'});
+                res.json({ success: false, statusCode: 403, errorMessage: 'Authentication failed. Wrong password.' });
             } else {
-
-                // if user is found and password is right
-                // create a token
+                
                 var token = jwt.sign(user.toJSON(), config.secret, {
                     expiresIn: '24h'
                 });
 
-                // return the information including token as JSON
-                res.json({
-                    success: true,
-                    statusCode: 200,
-                    message: 'You are logged in successfully!',
-                    token: token
-                });
+                res.json({ success: true, statusCode: 200, message: 'You are logged in successfully!', token: token });
             }
 
         }
