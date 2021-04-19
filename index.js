@@ -8,7 +8,7 @@ const expressValidator = require('express-validator')
 
 const mongoose = require('mongoose')
 var cors = require('cors')
-var routes = require('./routes/routes');
+var routes = require('./routes/_routes');
 
 const dotenv = require('dotenv')
 
@@ -32,8 +32,9 @@ app.use(function (req, res, next) {
     console.log(req.body);
     next();
 });
-
+var userRoutes = require('./routes/userRoutes')
 app.use('/', routes);
+app.use('/users', userRoutes)
 
 //error handler, if request parameters do not fullfil validations a error message would be sent back as response.
 app.use(function (err, req, res, next) {
