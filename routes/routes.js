@@ -23,7 +23,8 @@ var validation = require('../utils/validation');
 // route middleware to verify a token
 router.use(function (req, res, next) {
     console.log(req.originalUrl);
-    if (req.originalUrl === '/login') {
+    var urlPass = ['/login', '/users/register'];
+    if (urlPass.includes(req.originalUrl)) {
         return next();
     } else {
         // check header or url parameters or post parameters for token
@@ -69,6 +70,8 @@ router.route('/')
 // transfer to corresponding controller as per operation method.
 router.route('/users')
     .get(UserController.user.getAllUsers)
+
+router.route('/users/register')
     .post(validate(validation.register), UserController.user.register);
 
 //==========Login end point('/api/login')===========================================
