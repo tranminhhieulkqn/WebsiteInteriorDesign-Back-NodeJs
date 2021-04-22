@@ -1,20 +1,67 @@
+var jwt = require('jsonwebtoken');
 var User = require('../models/userModel');
+var config = require('../config/config');
 
-exports.user = {
+module.exports = {
+    login: function (req, res) {
+        // Get infor new user from req
+        infoUser = req.body;
+        // Check user by email, username, phone
+        User.findOne({
+            $or: [{ username: infoUser.username }, { email: infoUser.username }, { phone: infoUser.username }]
+        }, function (err, user) {
+            // Returns an error if it exists
+            if (err) {
+                res.json({ success: false, statusCode: 500, errorMessage: err });
+            }
+            // Return an error if no user exists 
+            if (!user) {
+                res.json({ success: false, statusCode: 403, errorMessage: 'Authentication failed. User not found.' });
+            } else if (user) {
+                // Matching passwords
+                if (!user.comparePassword(infoUser.password)) {
+                    res.json({ success: false, statusCode: 403, errorMessage: 'Authentication failed. Wrong password.' });
+                } else {
+                    // Successful authentication => token creation with jwt. 
+                    var token = jwt.sign(user.toJSON(), config.secret, {
+                        expiresIn: '24h'
+                    });
+                    res.json({ success: true, statusCode: 200, message: 'You are logged in successfully!', token: token });
+                }
+    
+            }
+        });
+    },
+
     register: function (req, res) {
-        User.findOne({ username: req.body.email }, function (err, user) {
+        // Get infor new user from req
+        infoNewUser = req.body;
+        // Check exist
+        User.findOne({
+            $or: [{ username: infoNewUser.username }, { email: infoNewUser.email }, { phone: infoNewUser.phone }]
+        }, function (err, user) {
             if (err) {
                 return res.json({ success: false, statusCode: 500, errorMessage: err });
             }
             if (user) {
-                return res.json({ success: false, statusCode: 302, errorMessage: 'Email ID is already exist in system' });
+                return res.json({
+                    success: false, statusCode: 302,
+                    errorMessage: 'User is already exist in system!'
+                });
             }
-            else {
-                var user = new User();
-                user.firstName = req.body.firstName;
-                user.lastName = req.body.lastName;
-                user.username = req.body.email;
-                user.password = req.body.password;
+            else { // If user is not in system.
+                var user = new User({
+                    firstName: infoNewUser.firstName,
+                    lastName: infoNewUser.lastName,
+                    birthDate: new Date(infoNewUser.birthDate),
+                    gender: infoNewUser.gender,
+                    username: infoNewUser.username,
+                    password: infoNewUser.password,
+                    phone: infoNewUser.phone,
+                    email: infoNewUser.email,
+                    address: infoNewUser.address,
+                    role: infoNewUser.role
+                });
                 user.save(function (err) {
                     if (err) {
                         return res.json({ success: false, statusCode: 500, errorMessage: err });

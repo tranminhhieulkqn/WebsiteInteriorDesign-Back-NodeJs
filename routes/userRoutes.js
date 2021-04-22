@@ -6,9 +6,12 @@ const { validate, ValidationError, Joi } = require('express-validation');
 
 
 router.route('/')
-    .get(UserController.user.getAllUsers);
+    .get(UserController.getAllUsers);
+
+router.route('/login')
+    .post(validate(validation.login), UserController.login);
 
 router.route('/register')
-    .post(validate(validation.register), UserController.user.register);
+    .post(validate(validation.register), UserController.register);
 
 module.exports = router;

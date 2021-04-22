@@ -3,17 +3,23 @@ const { validate, ValidationError, Joi } = require('express-validation')
 module.exports.register = {
     // options: { flatten: true },
     body: Joi.object({
-        firstName: Joi.string(), //First Name should be a string otherwise send a error message
-        lastName: Joi.string(),   //Last Name should be a string otherwise send a error message
-        email: Joi.string().email().required(), //Email should be as email format and required to be present in request body
-        password: Joi.string().required() //Phone number should be number formatted and must be present in request body
+        firstName: Joi.string(),
+        lastName: Joi.string(),
+        birthDate: Joi.string().required(),
+        gender: Joi.boolean(),
+        username: Joi.string().required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().required(),
+        phone: Joi.string(),
+        address: Joi.string(),
+        role: Joi.string().required()
     })
 };
 
 module.exports.login = {
     // options: { flatten: true },
     body: Joi.object({
-        email: Joi.string().email().required(), //Email should be as email format and required to be present in request body
+        username: Joi.string().required(), //Email should be as email format and required to be present in request body
         password: Joi.string().required() //Phone number should be number formatted and must be present in request body
     })
 };

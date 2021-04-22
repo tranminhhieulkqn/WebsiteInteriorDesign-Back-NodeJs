@@ -4,7 +4,7 @@ var jwt = require('jsonwebtoken');
 var config = require('../config/config');
 var IndexController = require('../controllers/indexController');
 
-const urlPass = ['/', '/login', '/users/register'];
+const urlPass = ['/', '/users/login', '/users/register'];
 
 //============MIDDLEWARE TO CHECK TOKEN IS PROVIDED TO ACCESS END POINTS===================
 
