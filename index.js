@@ -33,8 +33,10 @@ app.use(function (req, res, next) {
     next();
 });
 var userRoutes = require('./routes/userRoutes')
+var postRoutes = require('./routes/postRoutes')
 app.use('/', routes);
 app.use('/users', userRoutes)
+app.use('/posts', postRoutes)
 
 //error handler, if request parameters do not fullfil validations a error message would be sent back as response.
 app.use(function (err, req, res, next) {

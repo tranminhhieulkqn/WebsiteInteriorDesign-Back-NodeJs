@@ -24,7 +24,7 @@ var UserSchema = new mongoose.Schema({
 });
 
 /**
- * Sameple json to create User
+ * Sample json to create User
     Method: POST
     {
          "firstName" : "Tran Minh",
