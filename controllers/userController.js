@@ -24,7 +24,7 @@ module.exports = {
                     return res.json({ success: false, statusCode: 403, errorMessage: 'Authentication failed. Wrong password.' });
                 } else {
                     // Successful authentication => token creation with jwt. 
-                    var token = jwt.sign(user.toJSON(), config.secret, {
+                    var token = jwt.sign({ user: user.toJSON() }, config.secret, {
                         expiresIn: '24h'
                     });
                     return res.json({ success: true, statusCode: 200, message: 'You are logged in successfully!', token: token });
@@ -51,18 +51,8 @@ module.exports = {
                 });
             }
             else { // If user is not in system.
-                var user = new User({
-                    firstName: infoNewUser.firstName,
-                    lastName: infoNewUser.lastName,
-                    birthDate: new Date(infoNewUser.birthDate),
-                    gender: infoNewUser.gender,
-                    username: infoNewUser.username,
-                    password: infoNewUser.password,
-                    phone: infoNewUser.phone,
-                    email: infoNewUser.email,
-                    address: infoNewUser.address,
-                    role: infoNewUser.role
-                });
+                infoNewUser.birthDate = new Date(infoNewUser.birthDate);
+                var user = new User(infoNewUser);
                 user.save(function (err) {
                     if (err) {
                         return res.json({ success: false, statusCode: 500, errorMessage: err });
@@ -92,6 +82,9 @@ module.exports = {
     updateUser: function (req, res) {
         // Get infor new user from req
         infoNewUser = req.body;
+        if (infoNewUser.birthDate) {
+            infoNewUser.birthDate = new Date(infoNewUser.birthDate);
+        }
         User.findByIdAndUpdate(infoNewUser.id, infoNewUser, { new: true }, function (err, updatedUser) {
             if (err) {
                 return res.json({ success: false, statusCode: 500, errorMessage: err });
@@ -105,8 +98,8 @@ module.exports = {
 
     deleteUser: function (req, res) {
         // Get infor new user from req
-        infoNewUser = req.body;
-        User.findByIdAndDelete(infoNewUser.id, function (err, deletedUser) {
+        infoUser = req.body;
+        User.findByIdAndDelete(infoUser.id, function (err, deletedUser) {
             if (err) {
                 return res.json({ success: false, statusCode: 500, errorMessage: err });
             }

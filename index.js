@@ -34,9 +34,11 @@ app.use(function (req, res, next) {
 });
 var userRoutes = require('./routes/userRoutes')
 var postRoutes = require('./routes/postRoutes')
+var likesDetailsRoutes = require('./routes/likesDetailsRoutes')
 app.use('/', routes);
 app.use('/users', userRoutes)
 app.use('/posts', postRoutes)
+app.use('/vote', likesDetailsRoutes)
 
 //error handler, if request parameters do not fullfil validations a error message would be sent back as response.
 app.use(function (err, req, res, next) {

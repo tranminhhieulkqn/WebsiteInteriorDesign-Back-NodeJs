@@ -11,13 +11,14 @@ var PostSchema = new mongoose.Schema({
     updatedDate: { type: Date, default: Date.now },
     sumary: { type: String, required: true, minLength: 10, maxLenth: 200 },
     content: { type: String, required: true },
-    likesID: { type: String, default: 'likesID' },
-    numOfLikes: { type: Number, default: 0 },
-    commentsID: { type: String, default: 'commentsID' }
+    category: { type: String, required: true },
+    keywords: { type: String, required: true, default: '' },
+    isPublic: { type: Boolean, required: true, default: false },
+    numOfLikes: { type: Number, default: 0 }
 });
 
 /**
- * Sameple json to create User
+ * Sample json to create Post
     Method: POST
     {
         "authorID": "6082815db8de82110c0bd714",

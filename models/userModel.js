@@ -3,11 +3,6 @@ var bcrypt = require('bcrypt-nodejs');
 var SALT_WORK_FACTOR = 10;
 
 /**
- * Define role of users
- */
-const roleOfUsers = ['user', 'designer', 'admin']
-
-/**
  * Define table User in database.
  */
 var UserSchema = new mongoose.Schema({
