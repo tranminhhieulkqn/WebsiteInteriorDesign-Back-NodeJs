@@ -5,6 +5,6 @@ const authorize = require('../middleware/authorize')
 var IndexController = require('../controllers/indexController');
 
 router.route('/')
-    .get(authorize.permit([]), IndexController.getWelcomeMessage);
+    .get(IndexController.getWelcomeMessage);
 
 module.exports = router;
