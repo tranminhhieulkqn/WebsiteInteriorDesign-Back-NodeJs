@@ -34,11 +34,12 @@ app.use(function (req, res, next) {
 });
 
 // Try enable cors
-app.all('/', function(req, res, next) {
+app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     next()
 });
+
 
 var userRoutes = require('./routes/userRoutes')
 var postRoutes = require('./routes/postRoutes')
