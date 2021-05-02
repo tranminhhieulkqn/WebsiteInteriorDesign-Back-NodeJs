@@ -39,7 +39,7 @@ module.exports = {
         infoNewUser = req.body;
         // Check exist
         User.findOne({
-            $or: [{ username: infoNewUser.username }, { email: infoNewUser.email }, { phone: infoNewUser.phone }]
+            $or: [{ email: infoNewUser.email }]
         }, function (err, user) {
             if (err) {
                 return res.json({ success: false, statusCode: 500, errorMessage: err });
@@ -51,7 +51,7 @@ module.exports = {
                 });
             }
             else { // If user is not in system.
-                infoNewUser.birthDate = new Date(infoNewUser.birthDate);
+                infoNewUser.username = infoNewUser.email
                 var user = new User(infoNewUser);
                 user.save(function (err) {
                     if (err) {

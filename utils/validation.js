@@ -11,14 +11,14 @@ module.exports.register = {
     body: Joi.object({
         firstName: Joi.string(),
         lastName: Joi.string(),
-        birthDate: Joi.string().required(),
+        birthDate: Joi.string(),
         gender: Joi.boolean(),
-        username: Joi.string().required(),
+        username: Joi.string(),
         email: Joi.string().email().required(),
         password: Joi.string().required(),
         phone: Joi.string(),
         address: Joi.string(),
-        role: Joi.string().valid(roleOfUsers).lowercase().required()
+        role: Joi.string().valid(roleOfUsers).lowercase()
     })
 };
 
