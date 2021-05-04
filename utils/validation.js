@@ -3,7 +3,7 @@ const { validate, ValidationError, Joi } = require('express-validation')
 /**
  * Define role of users
  */
- const roleOfUsers = ('user', 'designer', 'admin')
+const roleOfUsers = ('user', 'designer', 'admin')
 
 //contact request validation module for all parameters exist in req.body
 module.exports.register = {
@@ -16,6 +16,7 @@ module.exports.register = {
         username: Joi.string(),
         email: Joi.string().email().required(),
         password: Joi.string().required(),
+        avatarURL: Joi.string(),
         phone: Joi.string(),
         address: Joi.string(),
         role: Joi.string().valid(roleOfUsers).lowercase()

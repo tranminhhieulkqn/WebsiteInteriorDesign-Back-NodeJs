@@ -27,7 +27,15 @@ module.exports = {
                     var token = jwt.sign({ user: user.toJSON() }, config.secret, {
                         expiresIn: '24h'
                     });
-                    return res.json({ success: true, statusCode: 200, message: 'You are logged in successfully!', token: token });
+                    return res.json({ success: true, statusCode: 200, message: 'You are logged in successfully!', token: token, infoUser: { // Can use to save in localsoto
+                        userID: user._id,
+                        username: user.username,
+                        nameDisplay: (user.firstName || "") + (user.lastName || ""),
+                        email: user.email,
+                        gender: user.gender,
+                        birthDay: user.birthDay,
+                        avatarURL: user.avatarURL || ""
+                    } });
                 }
 
             }

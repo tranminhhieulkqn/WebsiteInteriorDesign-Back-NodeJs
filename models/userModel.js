@@ -6,12 +6,13 @@ var SALT_WORK_FACTOR = 10;
  * Define table User in database.
  */
 var UserSchema = new mongoose.Schema({
-    firstName: { type: String,},
-    lastName: { type: String,},
+    firstName: { type: String, },
+    lastName: { type: String, },
     birthDay: { type: Date, default: Date.now },
     gender: { type: Boolean, required: true, default: true }, // true for male, false for female
     username: { type: String, required: true, lowercase: true, unique: true },
     password: { type: String, required: true },
+    avatarURL: { type: String },
     phone: { type: String, minLength: 10, manLength: 11 },
     email: { type: String, required: true, lowercase: true, unique: true },
     address: { type: String, maxLenth: 100 },
