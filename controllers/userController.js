@@ -1,6 +1,7 @@
 var jwt = require('jsonwebtoken');
 var User = require('../models/userModel');
 var config = require('../config/config');
+var bcrypt = require('bcrypt')
 const { response } = require('express');
 
 module.exports = {
@@ -34,7 +35,8 @@ module.exports = {
                         email: user.email,
                         gender: user.gender,
                         birthDay: user.birthDay,
-                        avatarURL: user.avatarURL || ""
+                        avatarURL: user.avatarURL || "",
+                        r073: bcrypt.hashSync("user", saltRounds)
                     } });
                 }
 
