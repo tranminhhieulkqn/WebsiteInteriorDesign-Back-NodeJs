@@ -9,17 +9,17 @@ const roleOfUsers = ('user', 'designer', 'admin')
 module.exports.register = {
     // options: { flatten: true },
     body: Joi.object({
-        firstName: Joi.string(),
-        lastName: Joi.string(),
-        birthDate: Joi.string(),
-        gender: Joi.boolean(),
-        username: Joi.string(),
+        // firstName: Joi.string(),
+        // lastName: Joi.string(),
+        // birthDate: Joi.string(),
+        // gender: Joi.boolean(),
+        // username: Joi.string(),
         email: Joi.string().email().required(),
         password: Joi.string().required(),
-        avatarURL: Joi.string(),
-        phone: Joi.string(),
-        address: Joi.string(),
-        role: Joi.string().valid(roleOfUsers).lowercase()
+        // avatarURL: Joi.string(),
+        // phone: Joi.string(),
+        // address: Joi.string(),
+        // role: Joi.string().valid(roleOfUsers).lowercase()
     })
 };
 
