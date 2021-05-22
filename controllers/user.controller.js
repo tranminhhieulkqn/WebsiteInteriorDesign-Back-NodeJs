@@ -104,6 +104,7 @@ module.exports = {
         try {
             // get user data from firestore
             var userData = await UserModel.getById(`${req.params.id}`);
+            console.log(req.params.id)
             // if not exist
             if (!userData)
                 return res.status(404).json({

@@ -44,7 +44,7 @@ module.exports = {
                     message: `no files found.`,
                 });
             // get the bucket path
-            var bucketPath = req.body.bucketPath;
+            var bucketPath = req.body.bucketPath || file.originalname;
             // upload file to firebase storage
             uploadFileToStorage(file, bucketPath)
                 .then((fileURL) => { // uploaded successfully
