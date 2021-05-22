@@ -14,10 +14,28 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+// try enable cors
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next()
+});
+
 // log all the incoming request body part so what is received can be check in console.
 app.use(function (req, res, next) {
     console.log(req.body);
     next();
+});
+
+// error handler, if request parameters do not fullfil validations a error message would be sent back as response.
+app.use(function (error, req, res, next) {
+    // specific for validation errors
+    if (error instanceof ValidationError) {
+        return res.status(error).json({
+            success: false,
+            message: error.message
+        });
+    }
 });
 
 // define all routes
