@@ -4,25 +4,11 @@ const { Model, schema, field } = require('firestore-schema-validator');
 
 const saltRounds = 10;
 
-/*
-var UserSchema = new mongoose.Schema({
-    firstName: { type: String, },
-    lastName: { type: String, },
-    birthDay: { type: Date, default: Date.now },
-    gender: { type: Boolean, required: true, default: true }, // true for male, false for female
-    username: { type: String, required: true, lowercase: true, unique: true },
-    password: { type: String, required: true },
-    avatarURL: { type: String },
-    phone: { type: String, minLength: 10, manLength: 11 },
-    email: { type: String, required: true, lowercase: true, unique: true },
-    address: { type: String, maxLenth: 100 },
-    role: { type: String, lowercase: true, default: 'user' }
-});
-*/
-
+/**
+ * Define schema User in database.
+ */
 const userSchema = schema({
-    firstName: field('First Name').string().trim().nullable(),
-    lastName: field('Last Name').string().trim().nullable(),
+    fullName: field('Full Name').string().trim().nullable(),
     gender: field('Gender').boolean().default(true).nullable(),
     password: field('Password').string()
         .match(/[A-Z]/, '%s must contain an uppercase letter.')
@@ -31,6 +17,7 @@ const userSchema = schema({
         .minLength(8),
     email: field('Email Address').string().email(),
     emailVerificationCode: field('Email Verification Code').string().nullable(),
+    avatarURL: field('Avatar image').string().nullable(),
     birthDate: field('Birth Date')
         .date('YYYY-MM-DD')
         .before(
@@ -39,7 +26,11 @@ const userSchema = schema({
                 .toISOString(),
             'You must be at least 13 years old.',
         ).nullable(),
-    role: field('Role User').string()
+    phone: field('Phone Number').string().nullable(),
+    address: field('Address').string().nullable(),
+    followed: field('Users Followed').array().default([]).nullable(),
+    role: field('Role User').string().default('user'),
+    status: field('Usage Status').string().default('using')
 })
 
 class UserModel extends Model {
@@ -66,7 +57,7 @@ class UserModel extends Model {
     }
 
     get fullName() {
-        return `${this._data.firstName} ${this._data.lastName}`
+        return `${this._data.fullName}`
     }
 
     // this.toJSON() by default returns this._data,

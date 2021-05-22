@@ -1,14 +1,19 @@
-const cors = require('cors')
-const logger = require('morgan')
+var path = require('path');
+const cors = require('cors');
+const logger = require('morgan');
 const express = require('express');
-const bodyParser = require('body-parser')
+var favicon = require('serve-favicon');
+const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');  // parse Cookie header and populate req.cookies.
-const configs = require('./configs/configs')
+const configs = require('./configs/configs');
 
 // firebase admin SDK
 const firebaseAdmin = require('./services/firebase-admin.services');
 
 const app = express();
+
+app.use(favicon(path.join(__dirname, 'assets', 'favicon.ico')));
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -41,10 +46,12 @@ app.use(function (error, req, res, next) {
 // define all routes
 const IndexRoutes = require('./routes/routes');
 const UserRoutes = require('./routes/user.routes');
-const UploadRoutes = require('./routes/upload.routes')
+const UploadRoutes = require('./routes/upload.routes');
+const PostRoutes = require('./routes/post.routes');
 app.use('/', IndexRoutes);
 app.use('/users', UserRoutes);
 app.use('/upload', UploadRoutes);
+app.use('/posts', PostRoutes);
 
 app.listen(configs.port || process.env.PORT, async () => {
     console.log("🚀 App is listening on port: " + `${configs.port}`);

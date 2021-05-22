@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const config = require('../configs/configs')
-const UserModel = require('../models/user.model')
+const config = require('../configs/configs');
+const UserModel = require('../models/user.model');
 
 const saltRounds = 10;
 
@@ -79,10 +79,9 @@ module.exports = {
             // get users data from firestore
             var usersData = await UserModel._collectionRef.get();
             usersData.forEach(doc => {
-                usersArray.push({ // push to usersArray
-                    id: doc.id,
-                    data: doc.data()
-                })
+                user = doc.data();
+                user.id = doc.id;
+                usersArray.push(user); // push to usersArray
             })
             // return result
             return res.status(200).json({
@@ -131,7 +130,7 @@ module.exports = {
     update: async (req, res) => {
         try {
             // get user data from firestore
-            var userData = await UserModel.getById(`${req.body.id}`);
+            var userData = await UserModel.getById(`${req.params.id}`);
             // if not exist
             if (!userData)
                 return res.status(200).json({

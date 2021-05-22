@@ -16,7 +16,7 @@ router.route('/get')
 router.route('/get/:id')
     .get(UserController.getUserByID);
 
-router.route('/update')
+router.route('/update/:id')
     .put(UserController.update);
 
 router.route('/changepassword/:id')
