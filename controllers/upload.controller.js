@@ -35,7 +35,7 @@ const uploadFileToStorage = async (file, bucketPath = '') => {
 };
 
 module.exports = {
-    uploadImage: (req, res) => {
+    uploadImage: async (req, res) => {
         try {
             var file = req.file;
             if (!file)
