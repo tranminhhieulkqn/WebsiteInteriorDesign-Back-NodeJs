@@ -29,5 +29,5 @@ app.use('/users', UserRoutes);
 app.use('/upload', UploadRoutes);
 
 app.listen(configs.port, async () => {
-    console.log("🚀 App is listening on url: " + configs.url);
+    console.log("🚀 App is listening on port: " + `${configs.port}`);
 })

@@ -4,9 +4,26 @@ const { Model, schema, field } = require('firestore-schema-validator');
 
 const saltRounds = 10;
 
+/*
+var UserSchema = new mongoose.Schema({
+    firstName: { type: String, },
+    lastName: { type: String, },
+    birthDay: { type: Date, default: Date.now },
+    gender: { type: Boolean, required: true, default: true }, // true for male, false for female
+    username: { type: String, required: true, lowercase: true, unique: true },
+    password: { type: String, required: true },
+    avatarURL: { type: String },
+    phone: { type: String, minLength: 10, manLength: 11 },
+    email: { type: String, required: true, lowercase: true, unique: true },
+    address: { type: String, maxLenth: 100 },
+    role: { type: String, lowercase: true, default: 'user' }
+});
+*/
+
 const userSchema = schema({
     firstName: field('First Name').string().trim().nullable(),
     lastName: field('Last Name').string().trim().nullable(),
+    gender: field('Gender').boolean().default(true).nullable(),
     password: field('Password').string()
         .match(/[A-Z]/, '%s must contain an uppercase letter.')
         .match(/[a-z]/, '%s must contain a lowercase letter.')
