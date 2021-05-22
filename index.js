@@ -46,6 +46,6 @@ app.use('/', IndexRoutes);
 app.use('/users', UserRoutes);
 app.use('/upload', UploadRoutes);
 
-app.listen(configs.port, async () => {
+app.listen(configs.port || process.env.PORT, async () => {
     console.log("🚀 App is listening on port: " + `${configs.port}`);
 })

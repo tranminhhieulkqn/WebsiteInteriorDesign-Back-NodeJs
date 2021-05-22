@@ -3,7 +3,6 @@ const assert = require('assert');
 const dotenv = require('dotenv').config({ path: path.resolve(__dirname, '../environments/.env') });
 
 const {
-    HOST,
     PORT,
     HOST_URL,
     SECRET_KEY,
@@ -19,14 +18,12 @@ const {
     FILE_SIZE_MAX,
 } = process.env;
 
-assert(HOST, 'HOST is required');
 assert(PORT, 'PORT is required');
 assert(CREDENTIAL_PATH, 'CREDENTIAL PATH is required');
 assert(DATABASE_URL, 'DATABASE URL is required');
 assert(STORAGE_BUCKET, 'STORAGE BUCKET is required');
 
 module.exports = {
-    host: HOST,
     port: PORT,
     url: HOST_URL,
     secretKey: SECRET_KEY,
