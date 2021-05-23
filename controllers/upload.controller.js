@@ -45,6 +45,7 @@ module.exports = {
                 });
             // get the bucket path
             var bucketPath = req.body.bucketPath || file.originalname;
+            console.log(bucketPath)
             // upload file to firebase storage
             uploadFileToStorage(file, bucketPath)
                 .then((fileURL) => { // uploaded successfully
