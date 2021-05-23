@@ -32,6 +32,16 @@ app.use(function (req, res, next) {
     next();
 });
 
+// define all routes
+const IndexRoutes = require('./routes/routes');
+const UserRoutes = require('./routes/user.routes');
+const UploadRoutes = require('./routes/upload.routes');
+const PostRoutes = require('./routes/post.routes');
+app.use('/', IndexRoutes);
+app.use('/users', UserRoutes);
+app.use('/upload', UploadRoutes);
+app.use('/posts', PostRoutes);
+
 // error handler, if request parameters do not fullfil validations a error message would be sent back as response.
 app.use(function (error, req, res, next) {
     // specific for validation errors
@@ -43,15 +53,13 @@ app.use(function (error, req, res, next) {
     }
 });
 
-// define all routes
-const IndexRoutes = require('./routes/routes');
-const UserRoutes = require('./routes/user.routes');
-const UploadRoutes = require('./routes/upload.routes');
-const PostRoutes = require('./routes/post.routes');
-app.use('/', IndexRoutes);
-app.use('/users', UserRoutes);
-app.use('/upload', UploadRoutes);
-app.use('/posts', PostRoutes);
+// catch wrong url
+app.use(async (req, res, next) => {
+    return res.status(404).json({
+        success: false,
+        message: 'wrong url.'
+    });
+})
 
 app.listen(configs.port || process.env.PORT, async () => {
     console.log("🚀 App is listening on port: " + `${configs.port}`);
