@@ -38,8 +38,10 @@ module.exports = {
                 .limit(1)
                 .get();
             var checkExist = false;
+            var idLikes = '';
             await likes.forEach((like) => {
                 checkExist = true;
+                idLikes = like.id;
             });
             if (!checkExist)
                 return res.status(404).json({
@@ -47,7 +49,8 @@ module.exports = {
                     message: 'likes not exist.'
                 });
             // create likes on firestore
-            await likes.delete();
+            var deleteLikes = await LikeDetailsModel.getById(idLikes);
+            await deleteLikes.delete();
             return res.status(200).json({
                 success: true,
                 message: 'unlike success.'
