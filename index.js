@@ -37,10 +37,12 @@ const IndexRoutes = require('./routes/routes');
 const UserRoutes = require('./routes/user.routes');
 const UploadRoutes = require('./routes/upload.routes');
 const PostRoutes = require('./routes/post.routes');
+const InteractiveRoutes = require('./routes/interactive.routes');
 app.use('/', IndexRoutes);
 app.use('/users', UserRoutes);
 app.use('/upload', UploadRoutes);
 app.use('/posts', PostRoutes);
+app.use('/interactives', InteractiveRoutes);
 
 // error handler, if request parameters do not fullfil validations a error message would be sent back as response.
 app.use(function (error, req, res, next) {

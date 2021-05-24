@@ -112,4 +112,82 @@ module.exports = {
             });
         }
     },
+
+    uploadFile: async (req, res) => {
+        try {
+            var file = req.file;
+            if (!file)
+                return res.status(404).json({
+                    success: false,
+                    message: `no files found.`,
+                });
+            // get the bucket path
+            var bucketPath = req.body.bucketPath || file.originalname;
+            console.log(bucketPath)
+            // upload file to firebase storage
+            uploadFileToStorage(file, bucketPath)
+                .then((fileURL) => { // uploaded successfully
+                    return res.status(200).send({
+                        success: true,
+                        message: 'file uploaded successfully.',
+                        fileURL: fileURL
+                    });
+                })
+                .catch((error) => { // upload failed
+                    // return error message
+                    return res.status(500).json({
+                        success: false,
+                        message: error.message
+                    });
+                });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
+    uploadFiles: async (req, res) => {
+        try {
+            var files = req.files;
+            if (!files)
+                return res.status(404).json({
+                    success: false,
+                    message: `no files found.`,
+                });
+            var numFiles = files.length
+            // get the bucket path
+            var bucketPath = req.body.bucketPath;
+            listFileURL = []
+            listError = []
+            for (const file of files) {
+                // upload file to firebase storage
+                await uploadFileToStorage(file, `${bucketPath}/${file.originalname}`)
+                    .then((fileURL) => { // uploaded successfully
+                        listFileURL.push(fileURL);
+                    })
+                    .catch((error) => { // upload failed
+                        listError.push(`${file.originalname}: ${error.message}`)
+                    });
+            }
+            return res.status(200).send({
+                success: true,
+                message: 'list image uploaded successfully.',
+                imageURL: listFileURL,
+                error: listError
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
 }
