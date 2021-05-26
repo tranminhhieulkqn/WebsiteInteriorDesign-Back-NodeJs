@@ -72,6 +72,26 @@ module.exports = {
         }
     },
 
+    hashPassword: async (req, res) => {
+        try {
+            var password = req.params.password;
+            const hashPass = bcrypt.hashSync(password, saltRounds);
+            return res.status(200).json({
+                success: true,
+                message: 'hashed successfully.',
+                hashPass: hashPass
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
     getAllUser: async (req, res) => {
         try {
             // define users array

@@ -6,7 +6,7 @@ module.exports = {
     roles: {
         admin: 'admin',
         designer: 'designer',
-        customer: 'customer'
+        user: 'user'
     },
     permit: (roles = []) => {
         return [

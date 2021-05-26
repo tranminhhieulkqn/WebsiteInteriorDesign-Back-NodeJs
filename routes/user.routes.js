@@ -7,6 +7,9 @@ const roles = authorize.roles;
 router.route('/register')
     .post(UserController.register);
 
+router.route('/hashpassword/:password').
+    post(UserController.hashPassword);
+
 router.route('/login')
     .post(UserController.login);
 
