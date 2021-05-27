@@ -21,8 +21,11 @@ app.use(cookieParser());
 
 // try enable cors
 app.use(function (req, res, next) {
+    // allow all origin
     res.header("Access-Control-Allow-Origin", "*");
+    // allow all headers
     res.header("Access-Control-Allow-Headers", "*");
+    // allow all methods
     res.header("Access-Control-Allow-Methods", "*");
     next()
 });
