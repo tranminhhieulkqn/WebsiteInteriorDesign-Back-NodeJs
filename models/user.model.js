@@ -8,6 +8,7 @@ const saltRounds = 10;
  * Define schema User in database.
  */
 const userSchema = schema({
+    iud: field('User ID').string().trim(),
     fullName: field('Full Name').string().trim().nullable(),
     gender: field('Gender').boolean().default(true).nullable(),
     password: field('Password').string()
@@ -72,7 +73,15 @@ class UserModel extends Model {
             fullName: this.fullName,
             email: this.email,
             isEmailVerified: this.isEmailVerified,
-            role: this.role
+            role: this.role,
+            gender: this.gender,
+            avatarURL: this.avatarURL,
+            birthDate: this.birthDate,
+            phone: this.phone,
+            address: this.address,
+            followed: this.followed,
+            role: this.role,
+            status: this.status
         }
     }
 }

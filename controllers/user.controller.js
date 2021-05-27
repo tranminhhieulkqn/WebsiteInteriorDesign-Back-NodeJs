@@ -74,7 +74,12 @@ module.exports = {
 
     hashPassword: async (req, res) => {
         try {
-            var password = req.params.password;
+            var password = req.query.password;
+            if (!password)
+                return res.status(404).json({
+                    success: false,
+                    message: "password required."
+                })
             const hashPass = bcrypt.hashSync(password, saltRounds);
             return res.status(200).json({
                 success: true,
@@ -100,7 +105,8 @@ module.exports = {
             var usersData = await UserModel._collectionRef.get();
             usersData.forEach(doc => {
                 user = doc.data();
-                user.id = doc.id;
+                user.uid = doc.id;
+                delete doc.id;
                 usersArray.push(user); // push to usersArray
             })
             // return result
@@ -120,11 +126,16 @@ module.exports = {
         }
     },
 
-    getUserByID: async (req, res) => {
+    getUserBy: async (req, res) => {
         try {
+            if (!req.query.id && !req.query.email)
+                return res.status(404).json({
+                    success: false,
+                    message: 'request email or id.'
+                })
             // get user data from firestore
-            var userData = await UserModel.getById(`${req.params.id}`);
-            console.log(req.params.id)
+            var userData = await UserModel.getById(`${req.query.id}`);
+            if (!userData) userData = await UserModel.getByEmail(`${req.query.email}`);
             // if not exist
             if (!userData)
                 return res.status(404).json({
@@ -151,7 +162,7 @@ module.exports = {
     update: async (req, res) => {
         try {
             // get user data from firestore
-            var userData = await UserModel.getById(`${req.params.id}`);
+            var userData = await UserModel.getByEmail(`${req.body.email}`);
             // if not exist
             if (!userData)
                 return res.status(200).json({
@@ -184,7 +195,7 @@ module.exports = {
     changePassword: async (req, res) => {
         try {
             // get user data from firestore
-            var userData = await UserModel.getById(`${req.params.id}`);
+            var userData = await UserModel.getByEmail(`${req.query.email}`);
             // if not exist
             if (!userData)
                 return res.status(200).json({
@@ -192,7 +203,7 @@ module.exports = {
                     message: `user not exist.`,
                 });
             // if exist, change hashed password with bcrypt
-            userData._data.password = bcrypt.hashSync(req.body.password, saltRounds);
+            userData._data.password = bcrypt.hashSync(req.query.newPassword, saltRounds);
             // update to firestore
             await userData.save();
             // return result
@@ -214,7 +225,7 @@ module.exports = {
     delete: async (req, res) => {
         try {
             // get user data from firestore
-            var userData = await UserModel.getById(`${req.params.id}`);
+            var userData = await UserModel.getById(`${req.query.id}`);
             // if not exist
             if (!userData)
                 return res.status(200).json({

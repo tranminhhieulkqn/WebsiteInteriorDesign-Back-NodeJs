@@ -4,28 +4,36 @@ const UserController = require('../controllers/user.controller');
 
 const roles = authorize.roles;
 
+// request parameter query: body.all
 router.route('/register')
     .post(UserController.register);
 
-router.route('/hashpassword/:password').
-    post(UserController.hashPassword);
+// request parameter query: password
+router.route('/hashpassword')
+    .get(UserController.hashPassword);
 
+// request parameter: email, password
 router.route('/login')
     .post(UserController.login);
 
+// not request parameter query
 router.route('/get')
     .get(UserController.getAllUser);
 
-router.route('/get/:id')
-    .get(UserController.getUserByID);
+// request parameter query: id(userID) or email
+router.route('/getBy')
+    .get(UserController.getUserBy);
 
-router.route('/update/:id')
+// request parameter query: body.all
+router.route('/update')
     .put(UserController.update);
 
-router.route('/changepassword/:id')
+// request parameter query: email, newPassword
+router.route('/changepassword')
     .put(UserController.changePassword);
 
-router.route('/delete/:id')
+// request parameter query: id(userID)
+router.route('/delete')
     .delete(authorize.permit([roles.admin]), UserController.delete);
 
 module.exports = router
