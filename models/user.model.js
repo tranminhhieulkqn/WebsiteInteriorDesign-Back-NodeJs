@@ -9,7 +9,7 @@ const saltRounds = 10;
  */
 const userSchema = schema({
     iud: field('User ID').string().trim(),
-    fullName: field('Full Name').string().trim().nullable(),
+    displayName: field('Display Name').string().trim().nullable(),
     gender: field('Gender').boolean().default(true).nullable(),
     password: field('Password').string()
         .match(/[A-Z]/, '%s must contain an uppercase letter.')
@@ -57,20 +57,20 @@ class UserModel extends Model {
         return Boolean(this._data.emailVerificationCode)
     }
 
-    get fullName() {
-        return `${this._data.fullName}`
+    get displayName() {
+        return `${this._data.displayName}`
     }
 
     // this.toJSON() by default returns this._data,
     // but you might want to display it differently
     // (eg. don't show password in responses,
-    // combine firstName and lastName into fullName, etc.)
+    // combine firstName and lastName into displayName, etc.)
     toJSON() {
         return {
             id: this._id, // ID of Document stored in Cloud Firestore
             createdAt: this._createdAt, // ISO String format date of Document's creation.
             updatedAt: this._updatedAt, // ISO String format date of Document's last update.
-            fullName: this.fullName,
+            displayName: this.displayName,
             email: this.email,
             isEmailVerified: this.isEmailVerified,
             role: this.role,
@@ -99,6 +99,7 @@ UserModel.on('save', async (user) => {
     try {
         const hashPass = bcrypt.hashSync(user.password, saltRounds);
         user.password = hashPass;
+        user.emailVerificationCode = user.email;
     } catch (error) {
         console.error(error);
     }

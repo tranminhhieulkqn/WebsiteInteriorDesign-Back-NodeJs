@@ -179,7 +179,7 @@ module.exports = {
             // return result
             return res.status(200).json({
                 success: true,
-                message: `user ${userData.fullName} updated successfully.`
+                message: `user ${userData.displayName} updated successfully.`
             });
         } catch (error) { // cacth error
             // show error to console
@@ -209,7 +209,7 @@ module.exports = {
             // return result
             return res.status(200).json({
                 success: true,
-                message: `password of user ${userData.fullName} changed successfully.`
+                message: `password of user ${userData.displayName} changed successfully.`
             });
         } catch (error) { // cacth error
             // show error to console
@@ -236,7 +236,7 @@ module.exports = {
             await userData.delete();
             return res.status(200).json({
                 success: true,
-                message: `user ${userData.fullName} deleted successfully.`,
+                message: `user ${userData.displayName} deleted successfully.`,
             })
         } catch (error) { // cacth error
             // show error to console
