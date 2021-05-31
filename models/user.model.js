@@ -31,8 +31,8 @@ const userSchema = schema({
     address: field('Address').string().nullable(),
     about: field('About').string().nullable(),
     followed: field('Users Followed').array().default([]).nullable(),
-    role: field('Role User').string().default('user').require(),
-    status: field('Usage Status').string().default('using').require()
+    role: field('Role User').string().default('user'),
+    status: field('Usage Status').string().default('using')
 })
 
 class UserModel extends Model {
@@ -98,7 +98,18 @@ UserModel.prehook('password', (data, user) => {
 
 UserModel.on('save', async (user) => {
     try {
-        user.about = `I'm ${user.displayName}`;
+        user.about = user.about | `I'm ${user.displayName}`;
+        user.emailVerificationCode = user.email;
+        const hashPass = bcrypt.hashSync(user.password, saltRounds);
+        user.password = hashPass;
+    } catch (error) {
+        console.error(error);
+    }
+})
+
+UserModel.on('updated', async (user) => {
+    try {
+        user.about = user.about | `I'm ${user.displayName}`;
         user.emailVerificationCode = user.email;
         const hashPass = bcrypt.hashSync(user.password, saltRounds);
         user.password = hashPass;
