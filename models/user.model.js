@@ -80,6 +80,7 @@ class UserModel extends Model {
             birthDate: this.birthDate,
             phone: this.phone,
             address: this.address,
+            about: this.about,
             followed: this.followed,
             role: this.role,
             status: this.status
