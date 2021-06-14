@@ -8,7 +8,7 @@ const saltRounds = 10;
  * Define schema User in database.
  */
 const userSchema = schema({
-    iud: field('User ID').string().trim(),
+    uid: field('User ID').string().trim(),
     displayName: field('Display Name').string().trim().nullable(),
     gender: field('Gender').boolean().default(true).nullable(),
     password: field('Password').string()
@@ -68,7 +68,7 @@ class UserModel extends Model {
     // combine firstName and lastName into displayName, etc.)
     toJSON() {
         return {
-            id: this._id, // ID of Document stored in Cloud Firestore
+            uid: this._id, // ID of Document stored in Cloud Firestore
             createdAt: this._createdAt, // ISO String format date of Document's creation.
             updatedAt: this._updatedAt, // ISO String format date of Document's last update.
             displayName: this.displayName,
