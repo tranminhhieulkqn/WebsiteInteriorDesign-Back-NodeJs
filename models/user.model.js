@@ -30,6 +30,8 @@ const userSchema = schema({
     phone: field('Phone Number').string().nullable(),
     address: field('Address').string().nullable(),
     about: field('About').string().nullable(),
+    social: field('Social Link').array().default(['https://www.facebook.com/', 'https://www.instagram.com/', 'https://twitter.com/?lang=vi']).nullable(),
+    tags: field('Tags').array().default([]).nullable(),
     followed: field('Users Followed').array().default([]).nullable(),
     role: field('Role User').string().default('user'),
     status: field('Usage Status').string().default('using')
@@ -81,6 +83,8 @@ class UserModel extends Model {
             phone: this.phone,
             address: this.address,
             about: this.about,
+            social: this.social,
+            tags: this.tags,
             followed: this.followed,
             role: this.role,
             status: this.status
@@ -112,8 +116,10 @@ UserModel.on('updated', async (user) => {
     try {
         user.about = user.about | `I'm ${user.displayName}`;
         user.emailVerificationCode = user.email;
-        const hashPass = bcrypt.hashSync(user.password, saltRounds);
-        user.password = hashPass;
+        if (user.password){
+            const hashPass = bcrypt.hashSync(user.password, saltRounds);
+            user.password = hashPass;
+        }
     } catch (error) {
         console.error(error);
     }

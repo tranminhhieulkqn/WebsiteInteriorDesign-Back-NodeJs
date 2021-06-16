@@ -165,15 +165,13 @@ module.exports = {
             var userData = await UserModel.getByEmail(`${req.body.email}`);
             // if not exist
             if (!userData)
-                return res.status(200).json({
+                return res.status(404).json({
                     success: false,
                     message: `user not exist.`,
                 });
             // if exist, change user data
             userData._data = req.body;
             delete userData._data.id
-            // hash password
-            userData._data.password = bcrypt.hashSync(req.body.password, saltRounds);
             // update to firestore
             await userData.save();
             // return result

@@ -5,14 +5,14 @@ const { Model, schema, field } = require('firestore-schema-validator');
  */
 const postSchema = schema({
     authorID: field('Author ID').string().trim(),
-    tittle: field('Tittle').string().trim(),
-    thumbnail: field('Thumbnail').string().trim(),
+    title: field('Title').string().trim(),
+    summary: field('Summary Content').string().trim().nullable(),
+    thumbnail: field('Thumbnail').string().trim().nullable(),
+    content: field('Main Content').string().trim().nullable(),
     gallery: field('Gallery').array().default([]).nullable(),
-    sumary: field('Summary Content').string().trim().nullable(),
-    content: field('Main Content').string().trim(),
-    category: field('Category').string().trim().nullable(),
-    keywords: field('Keywords').string().trim().nullable(),
-    isPublic: field('Post Status').boolean().default(false),
+    category: field('Category').array().default([]).nullable(),
+    keywords: field('Keywords').array().default([]).nullable(),
+    status: field('Post Status').string().default('draft'),
     likeCount: field('Like Count').number().default(0)
 })
 
@@ -40,11 +40,11 @@ class PostModel extends Model {
             tittle: this.tittle,
             thumbnail: this.thumbnail,
             gallery: this.gallery,
-            sumary: this.sumary,
+            summary: this.summary,
             content: this.content,
             category: this.category,
             keywords: this.keywords,
-            isPublic: this.isPublic,
+            status: this.status,
             likeCount: this.likeCount
         }
     }
