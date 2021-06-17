@@ -7,13 +7,13 @@ router.route('/create')
 router.route('/get')
     .get(PostController.getAllPost);
 
-router.route('/get/:id')
+router.route('/getBy')
     .get(PostController.getPostByID);
 
-router.route('/update/:id')
+router.route('/update')
     .put(PostController.update);
 
-router.route('/delete/:id')
+router.route('/delete')
     .delete(PostController.delete);
 
 module.exports = router;

@@ -58,4 +58,7 @@ router.route('/images').post(
     },
     UploadController.uploadImages);
 
+router.route('/delete')
+    .delete(UploadController.deleteFile);
+
 module.exports = router

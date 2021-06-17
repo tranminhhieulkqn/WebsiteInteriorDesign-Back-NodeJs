@@ -57,7 +57,7 @@ module.exports = {
     getPostByID: async (req, res) => {
         try {
             // get post data from firestore
-            var postData = await PostModel.getById(`${req.params.id}`);
+            var postData = await PostModel.getById(`${req.query.id}`);
             // if not exist
             if (!postData)
                 return res.status(404).json({
@@ -84,7 +84,7 @@ module.exports = {
     update: async (req, res) => {
         try {
             // get post data from firestore
-            var postData = await PostModel.getById(`${req.params.id}`);
+            var postData = await PostModel.getById(`${req.query.id}`);
             // if not exist
             if (!postData)
                 return res.status(200).json({
@@ -115,7 +115,7 @@ module.exports = {
     delete: async (req, res) => {
         try {
             // get post data from firestore
-            var postData = await PostModel.getById(`${req.params.id}`);
+            var postData = await PostModel.getById(`${req.query.id}`);
             // if not exist
             if (!postData)
                 return res.status(200).json({

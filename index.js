@@ -27,6 +27,10 @@ app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Headers", "*");
     // allow all methods
     res.header("Access-Control-Allow-Methods", "*");
+    // Disable caching for content files
+    // res.header("Cache-Control", "No-Cache, No-Store, Must-Revalidate");
+    // res.header("Pragma", "No-Cache");
+    // res.header("Expires", 0);
     next()
 });
 

@@ -44,8 +44,7 @@ module.exports = {
                     message: `no files found.`,
                 });
             // get the bucket path
-            var bucketPath = req.body.bucketPath || file.originalname;
-            console.log(bucketPath)
+            var bucketPath = req.body.bucketPath + file.originalname;
             // upload file to firebase storage
             uploadFileToStorage(file, bucketPath)
                 .then((fileURL) => { // uploaded successfully
@@ -62,6 +61,39 @@ module.exports = {
                         message: error.message
                     });
                 });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
+    deleteFile: async (req, res) => {
+        try {
+            console.log(req.query.fileURL);
+            // Create a reference to the file to delete
+            let fileURL = req.query.fileURL.replace(`https://storage.googleapis.com/interior-design-afc76.appspot.com/`, ``)
+            console.log(fileURL);
+            let desertRef = bucket.file(fileURL);
+            
+            // Delete the file
+            desertRef.delete().then(() => {
+                // File deleted successfully
+                return res.status(200).send({
+                    success: true,
+                    message: 'image deleted successfully.',
+                });
+            }).catch((error) => {
+                // Uh-oh, an error occurred!
+                return res.status(500).json({
+                    success: false,
+                    message: error.message
+                });
+            });
         } catch (error) { // cacth error
             // show error to console
             console.error(error.message);

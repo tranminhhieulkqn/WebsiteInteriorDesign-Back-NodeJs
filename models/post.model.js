@@ -10,7 +10,7 @@ const postSchema = schema({
     thumbnail: field('Thumbnail').string().trim().nullable(),
     content: field('Main Content').string().trim().nullable(),
     gallery: field('Gallery').array().default([]).nullable(),
-    category: field('Category').array().default([]).nullable(),
+    category: field('Category').string().default("Interior Design").nullable(),
     keywords: field('Keywords').array().default([]).nullable(),
     status: field('Post Status').string().default('draft'),
     likeCount: field('Like Count').number().default(0)
@@ -34,10 +34,11 @@ class PostModel extends Model {
     // combine firstName and lastName into fullName, etc.)
     toJSON() {
         return {
-            id: this._id, // ID of Document stored in Cloud Firestore
+            pid: this._id, // ID of Document stored in Cloud Firestore
             createdAt: this._createdAt, // ISO String format date of Document's creation.
             updatedAt: this._updatedAt, // ISO String format date of Document's last update.
-            tittle: this.tittle,
+            authorID: this.authorID,
+            title: this.title,
             thumbnail: this.thumbnail,
             gallery: this.gallery,
             summary: this.summary,
