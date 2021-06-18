@@ -41,7 +41,7 @@ module.exports = {
             return res.status(200).json({
                 success: true,
                 message: "list of post.",
-                post: postsArray
+                posts: postsArray
             });
         } catch (error) { // cacth error
             // show error to console
