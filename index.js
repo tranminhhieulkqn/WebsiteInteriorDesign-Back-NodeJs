@@ -15,8 +15,8 @@ const app = express();
 app.use(favicon(path.join(__dirname, 'assets', 'favicon.ico')));
 
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({ limit: '50mb', extended: true }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(cookieParser());
 
 // try enable cors
@@ -28,9 +28,9 @@ app.use(function (req, res, next) {
     // allow all methods
     res.header("Access-Control-Allow-Methods", "*");
     // Disable caching for content files
-    // res.header("Cache-Control", "No-Cache, No-Store, Must-Revalidate");
-    // res.header("Pragma", "No-Cache");
-    // res.header("Expires", 0);
+    res.header("Cache-Control", "No-Cache, No-Store, Must-Revalidate");
+    res.header("Pragma", "No-Cache");
+    res.header("Expires", 0);
     next()
 });
 
@@ -53,15 +53,15 @@ app.use('/posts', PostRoutes);
 app.use('/interactives', InteractiveRoutes);
 
 // error handler, if request parameters do not fullfil validations a error message would be sent back as response.
-app.use(function (error, req, res, next) {
-    // specific for validation errors
-    if (error instanceof ValidationError) {
-        return res.status(error).json({
-            success: false,
-            message: error.message
-        });
-    }
-});
+// app.use(function (error, req, res, next) {
+//     // specific for validation errors
+//     if (error instanceof ValidationError) {
+//         return res.status(error).json({
+//             success: false,
+//             message: error.message
+//         });
+//     }
+// });
 
 // catch wrong url
 app.use(async (req, res, next) => {

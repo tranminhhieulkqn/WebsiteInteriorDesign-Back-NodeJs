@@ -85,6 +85,7 @@ module.exports = {
         try {
             // get post data from firestore
             var postData = await PostModel.getById(`${req.query.id}`);
+            console.log(req.query.id);
             // if not exist
             if (!postData)
                 return res.status(200).json({
@@ -93,7 +94,8 @@ module.exports = {
                 });
             // if exist, change post data
             postData._data = req.body;
-            delete postData._data.id;
+            console.log(req.body);
+            delete postData._data.pid;
             // update to firestore
             await postData.save();
             // return result
