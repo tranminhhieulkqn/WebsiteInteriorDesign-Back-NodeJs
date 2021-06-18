@@ -81,6 +81,38 @@ module.exports = {
         }
     },
 
+    getLastPost: async (req, res) => {
+        try {
+            // take by amount in query param or not default 1
+            let amount = 1;
+            if (req.query.amount) {
+                amount = parseInt(req.query.amount);
+            }
+            // define posts array get
+            var postsArray = [];
+            // get post data from firestore
+            var postsData = await PostModel._collectionRef.orderBy('dateCreated', 'desc').limit(amount).get();
+            postsData.forEach(doc => {
+                post = doc.data();
+                post.id = doc.id;
+                postsArray.push(post); // push to postsArray
+            })
+            return res.status(200).json({
+                success: true,
+                message: `data of post`,
+                posts: postsArray
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
     update: async (req, res) => {
         try {
             // get post data from firestore
@@ -102,7 +134,7 @@ module.exports = {
             return res.status(200).json({
                 success: true,
                 message: `post '${postData._data.tittle}' updated successfully.`
-            });      
+            });
         } catch (error) { // cacth error
             // show error to console
             console.error(error.message);

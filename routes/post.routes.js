@@ -10,6 +10,9 @@ router.route('/get')
 router.route('/getBy')
     .get(PostController.getPostByID);
 
+router.route('/getLast')
+    .get(PostController.getLastPost);
+
 router.route('/update')
     .put(PostController.update);
 

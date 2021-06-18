@@ -12,6 +12,7 @@ const postSchema = schema({
     gallery: field('Gallery').array().default([]).nullable(),
     category: field('Category').string().default("Interior Design").nullable(),
     keywords: field('Keywords').array().default([]).nullable(),
+    dateCreated: field('Date Created').date().nullable(),
     status: field('Post Status').string().default('draft'),
     likeCount: field('Like Count').number().default(0)
 })
@@ -46,7 +47,8 @@ class PostModel extends Model {
             category: this.category,
             keywords: this.keywords,
             status: this.status,
-            likeCount: this.likeCount
+            likeCount: this.likeCount,
+            dateCreated: this.dateCreated
         }
     }
 }
