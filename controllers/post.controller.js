@@ -120,12 +120,23 @@ module.exports = {
             if (req.query.amount) {
                 amount = parseInt(req.query.amount);
             }
+            // take by month ago in query param or not default 1
+            let monthago = 1;
+            if (req.query.monthago) {
+                monthago = parseInt(req.query.monthago);
+            }
+            // define time month ago
+            var monthAgo = new Date();
+            monthAgo.setMonth(monthAgo.getMonth() - monthago);
+            console.log(monthAgo.toISOString())
+            // const expirationDate = firebaseAdmin.firestore.Timestamp.fromDate(monthAgo);
+            // console.log(expirationDate)
             // define posts array get
             var postsArray = [];
             // get post data from firestore
             var postsData = await PostModel._collectionRef
-                .orderBy('likeCount', 'desc')
-                .orderBy('averageRating', 'desc')
+                .where('dateCreated', '<', monthAgo.toISOString())
+                .orderBy('dateCreated', 'desc')
                 .limit(amount).get();
             postsData.forEach(doc => {
                 post = doc.data();
