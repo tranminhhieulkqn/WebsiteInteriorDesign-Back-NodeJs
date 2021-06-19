@@ -46,6 +46,7 @@ const UserRoutes = require('./routes/user.routes');
 const UploadRoutes = require('./routes/upload.routes');
 const PostRoutes = require('./routes/post.routes');
 const InteractiveRoutes = require('./routes/interactive.routes');
+// const CommentDetailsRoutes = require('./routes/');
 app.use('/', IndexRoutes);
 app.use('/users', UserRoutes);
 app.use('/upload', UploadRoutes);

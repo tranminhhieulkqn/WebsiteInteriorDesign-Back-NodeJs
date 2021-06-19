@@ -46,8 +46,12 @@ class CommentDetailsModel extends Model {
             id: this._id, // ID of Document stored in Cloud Firestore
             createdAt: this._createdAt, // ISO String format date of Document's creation.
             updatedAt: this._updatedAt, // ISO String format date of Document's last update.
+            postID: this.postID,
             authorID: this.authorID,
-            postID: this.postID
+            authorAvatar: this.authorAvatar,
+            content: this.content,
+            rated: this.rated,
+            dateCreated: this.dateCreated,
         }
     }
 }

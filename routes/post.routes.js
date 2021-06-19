@@ -11,7 +11,10 @@ router.route('/getBy')
     .get(PostController.getPostByID);
 
 router.route('/getLast')
-    .get(PostController.getLastPost);
+    .get(PostController.getLastPosts);
+
+router.route('/getFeatured')
+    .get(PostController.getFeaturedPosts);
 
 router.route('/update')
     .put(PostController.update);

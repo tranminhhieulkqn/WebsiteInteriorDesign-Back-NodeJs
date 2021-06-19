@@ -14,7 +14,8 @@ const postSchema = schema({
     keywords: field('Keywords').array().default([]).nullable(),
     dateCreated: field('Date Created').date().nullable(),
     status: field('Post Status').string().default('draft'),
-    likeCount: field('Like Count').number().default(0)
+    likeCount: field('Like Count').number().default(0),
+    averageRating: field('Average Rating').number().default(0),
 })
 
 class PostModel extends Model {
@@ -40,15 +41,16 @@ class PostModel extends Model {
             updatedAt: this._updatedAt, // ISO String format date of Document's last update.
             authorID: this.authorID,
             title: this.title,
-            thumbnail: this.thumbnail,
-            gallery: this.gallery,
             summary: this.summary,
+            thumbnail: this.thumbnail,
             content: this.content,
+            gallery: this.gallery,
             category: this.category,
             keywords: this.keywords,
+            dateCreated: this.dateCreated,
             status: this.status,
             likeCount: this.likeCount,
-            dateCreated: this.dateCreated
+            averageRating: this.averageRating
         }
     }
 }

@@ -1,19 +1,20 @@
-const PostModel = require('../models/post.model');
+const CommentDetailsModel = require('../models/commentDetails.model');
+
 
 module.exports = {
     create: async (req, res) => {
         try {
-            postData = req.body;
-            if (!postData)
-                return res.status(404).json({
-                    success: false,
-                    message: 'no info post.'
-                });
-            var postCreated = await PostModel.create(postData);
+            let postID = req.query.id;
+            if (!postID)
+                throw new Error('Post ID required in query param.');
+            commentData = req.body;
+            if (!commentData)
+                throw new Error('The data of comment required.');
+            
+            var commentCreated = await CommentDetailsModel.create(commentData);
             return res.status(200).json({
                 success: true,
-                message: 'post created successfully.',
-                post: postCreated
+                message: 'comment created successfully.',
             })
         } catch (error) { // cacth error
             // show error to console
@@ -81,7 +82,7 @@ module.exports = {
         }
     },
 
-    getLastPosts: async (req, res) => {
+    getLastPost: async (req, res) => {
         try {
             // take by amount in query param or not default 1
             let amount = 1;
@@ -92,41 +93,6 @@ module.exports = {
             var postsArray = [];
             // get post data from firestore
             var postsData = await PostModel._collectionRef.orderBy('dateCreated', 'desc').limit(amount).get();
-            postsData.forEach(doc => {
-                post = doc.data();
-                post.id = doc.id;
-                postsArray.push(post); // push to postsArray
-            })
-            return res.status(200).json({
-                success: true,
-                message: `data of post`,
-                posts: postsArray
-            });
-        } catch (error) { // cacth error
-            // show error to console
-            console.error(error.message);
-            // return error message
-            return res.status(500).json({
-                success: false,
-                message: error.message
-            });
-        }
-    },
-
-    getFeaturedPosts: async (req, res) => {
-        try {
-            // take by amount in query param or not default 1
-            let amount = 1;
-            if (req.query.amount) {
-                amount = parseInt(req.query.amount);
-            }
-            // define posts array get
-            var postsArray = [];
-            // get post data from firestore
-            var postsData = await PostModel._collectionRef
-                .orderBy('likeCount', 'desc')
-                .orderBy('averageRating', 'desc')
-                .limit(amount).get();
             postsData.forEach(doc => {
                 post = doc.data();
                 post.id = doc.id;
