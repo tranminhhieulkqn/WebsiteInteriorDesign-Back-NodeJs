@@ -129,13 +129,11 @@ module.exports = {
             var monthAgo = new Date();
             monthAgo.setMonth(monthAgo.getMonth() - monthago);
             console.log(monthAgo.toISOString())
-            // const expirationDate = firebaseAdmin.firestore.Timestamp.fromDate(monthAgo);
-            // console.log(expirationDate)
             // define posts array get
             var postsArray = [];
             // get post data from firestore
             var postsData = await PostModel._collectionRef
-                .where('dateCreated', '<', monthAgo.toISOString())
+                .where('dateCreated', '>', monthAgo.toISOString())
                 .orderBy('dateCreated', 'desc')
                 .limit(amount).get();
             postsData.forEach(doc => {

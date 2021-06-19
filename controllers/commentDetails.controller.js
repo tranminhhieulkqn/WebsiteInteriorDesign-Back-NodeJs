@@ -1,17 +1,27 @@
+const PostModel = require('../models/post.model');
 const CommentDetailsModel = require('../models/commentDetails.model');
 
 
 module.exports = {
     create: async (req, res) => {
         try {
-            let postID = req.query.id;
-            if (!postID)
-                throw new Error('Post ID required in query param.');
             commentData = req.body;
             if (!commentData)
                 throw new Error('The data of comment required.');
-            
+            // create comment
             var commentCreated = await CommentDetailsModel.create(commentData);
+            // check update rate for post
+            let allCommentsOfPost = await CommentDetailsModel.getAllBy('postID', commentData.postID)
+            let sum = 0;
+            allCommentsOfPost.forEach(post => {
+                sum += post._data.rated;
+            });
+            let averageRating = Math.round((sum / allCommentsOfPost.length) * 10) / 10;
+            // update rating for post
+            let postUpdate = await PostModel.getById(commentData.postID);
+            postUpdate._data = Object.assign(postUpdate._data, { "averageRating": averageRating });
+            await postUpdate.save()
+            // return result
             return res.status(200).json({
                 success: true,
                 message: 'comment created successfully.',
@@ -27,17 +37,13 @@ module.exports = {
         }
     },
 
-    getAllPost: async (req, res) => {
+    getAllCommentOfPost: async (req, res) => {
         try {
-            // define posts array
-            var postsArray = [];
-            // get posts data from firestore
-            var postsData = await PostModel._collectionRef.get();
-            postsData.forEach(doc => {
-                post = doc.data();
-                post.id = doc.id;
-                postsArray.push(post); // push to postsArray
-            })
+            let postID = req.query.id;
+            if (!postID)
+                throw new Error('Post ID required in query param.');
+            // get all comment of post
+            var postsArray = await CommentDetailsModel.getAllBy('postID', postID);
             // return result
             return res.status(200).json({
                 success: true,
@@ -55,86 +61,29 @@ module.exports = {
         }
     },
 
-    getPostByID: async (req, res) => {
-        try {
-            // get post data from firestore
-            var postData = await PostModel.getById(`${req.query.id}`);
-            // if not exist
-            if (!postData)
-                return res.status(404).json({
-                    success: false,
-                    message: `post not exist.`,
-                });
-            // if exist, return result
-            return res.status(200).json({
-                success: true,
-                message: `data of post '${postData.tittle}.'`,
-                post: postData
-            });
-        } catch (error) { // cacth error
-            // show error to console
-            console.error(error.message);
-            // return error message
-            return res.status(500).json({
-                success: false,
-                message: error.message
-            });
-        }
-    },
-
-    getLastPost: async (req, res) => {
-        try {
-            // take by amount in query param or not default 1
-            let amount = 1;
-            if (req.query.amount) {
-                amount = parseInt(req.query.amount);
-            }
-            // define posts array get
-            var postsArray = [];
-            // get post data from firestore
-            var postsData = await PostModel._collectionRef.orderBy('dateCreated', 'desc').limit(amount).get();
-            postsData.forEach(doc => {
-                post = doc.data();
-                post.id = doc.id;
-                postsArray.push(post); // push to postsArray
-            })
-            return res.status(200).json({
-                success: true,
-                message: `data of post`,
-                posts: postsArray
-            });
-        } catch (error) { // cacth error
-            // show error to console
-            console.error(error.message);
-            // return error message
-            return res.status(500).json({
-                success: false,
-                message: error.message
-            });
-        }
-    },
-
     update: async (req, res) => {
         try {
             // get post data from firestore
-            var postData = await PostModel.getById(`${req.query.id}`);
-            console.log(req.query.id);
+            let commentData = await CommentDetailsModel.getById(`${req.query.id}`);
             // if not exist
-            if (!postData)
-                return res.status(200).json({
-                    success: false,
-                    message: `post not exist.`,
-                });
+            if (!commentData)
+                throw new Error('Post ID required in query param.');
+
             // if exist, change post data
-            postData._data = req.body;
-            console.log(req.body);
-            delete postData._data.pid;
+            commentData._data = Object.assign(commentData._data, req.body);
+            delete commentData._data.id;
             // update to firestore
-            await postData.save();
+            await commentData.save();
+
+
+            // update rating for post
+            let postID = commentData._data.postID;
+
+
             // return result
             return res.status(200).json({
                 success: true,
-                message: `post '${postData._data.tittle}' updated successfully.`
+                message: `post '${commentData._data.content}' updated successfully.`
             });
         } catch (error) { // cacth error
             // show error to console
@@ -149,19 +98,34 @@ module.exports = {
 
     delete: async (req, res) => {
         try {
+            let commentID = req.query.id
+            if (!commentID)
+                throw new Error('Comment ID required in query param.')
             // get post data from firestore
-            var postData = await PostModel.getById(`${req.query.id}`);
-            // if not exist
-            if (!postData)
-                return res.status(200).json({
-                    success: false,
-                    message: `post not exist.`,
-                });
+            let commentDelete = await CommentDetailsModel.getById(`${commentID}`);
+            // get post id to update
+            let postID = commentDelete._data.postID;
             // delete post data on firestore
-            await postData.delete();
+            await commentDelete.delete();
+
+            // check update rate for post
+            let allCommentsOfPost = await CommentDetailsModel.getAllBy('postID', postID)
+            let sum = 0;
+            allCommentsOfPost.forEach(post => {
+                sum += post._data.rated;
+            });
+            let averageRating = (allCommentsOfPost.length > 0)
+                ? Math.round((sum / allCommentsOfPost.length) * 10) / 10
+                : 0;
+            // update rating for post
+            let postUpdate = await PostModel.getById(postID);
+            postUpdate._data = Object.assign(postUpdate._data, { "averageRating": averageRating });
+            await postUpdate.save()
+
+            // return result
             return res.status(200).json({
                 success: true,
-                message: `post '${postData.tittle}' deleted successfully.`,
+                message: `comment deleted successfully.`,
             })
         } catch (error) { // cacth error
             // show error to console
@@ -172,5 +136,5 @@ module.exports = {
                 message: error.message
             });
         }
-    }
+    },
 }

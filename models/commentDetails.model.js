@@ -8,7 +8,7 @@ const commentDetailsSchema = schema({
     authorID: field('ID of the person who commented the Post').string().trim(),
     authorAvatar: field('Avatar of the person who commented the Post').string().trim(),
     content: field('Comment Content').string().trim(),
-    rated: field('Viewer Ratings').number(),
+    rated: field('Rated').number(),
     dateCreated: field('Date Created').date().nullable(),
 })
 
