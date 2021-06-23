@@ -169,8 +169,7 @@ module.exports = {
                     message: `post not exist.`,
                 });
             // if exist, change post data
-            postData._data = req.body;
-            console.log(req.body);
+            postData._data = Object.assign(postData._data, req.body);
             delete postData._data.pid;
             // update to firestore
             await postData.save();

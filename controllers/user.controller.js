@@ -170,7 +170,7 @@ module.exports = {
                     message: `user not exist.`,
                 });
             // if exist, change user data
-            userData._data = req.body;
+            userData._data = Object.assign(userData._data, req.body);
             delete userData._data.id
             // update to firestore
             await userData.save();
