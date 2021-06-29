@@ -105,8 +105,7 @@ module.exports = {
             var usersData = await UserModel._collectionRef.get();
             usersData.forEach(doc => {
                 user = doc.data();
-                user.uid = doc.id;
-                delete doc.id;
+                user.id = doc.id;
                 usersArray.push(user); // push to usersArray
             })
             // return result

@@ -37,18 +37,42 @@ module.exports = {
         }
     },
 
+    getAllCommentOfPost_: async (req, res) => {
+        try {
+            let postID = req.query.id;
+            if (!postID)
+                throw new Error('Post ID required in query param.');
+            // get all comment of post
+            var commentsArray = await CommentDetailsModel.getAllBy('postID', postID);
+            // return result
+            return res.status(200).json({
+                success: true,
+                message: "list of post.",
+                posts: commentsArray
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
     getAllCommentOfPost: async (req, res) => {
         try {
             let postID = req.query.id;
             if (!postID)
                 throw new Error('Post ID required in query param.');
             // get all comment of post
-            var postsArray = await CommentDetailsModel.getAllBy('postID', postID);
+            var commentsArray = await CommentDetailsModel.getAllBy('postID', postID);
             // return result
             return res.status(200).json({
                 success: true,
-                message: "list of post.",
-                posts: postsArray
+                message: "list comments of post.",
+                comments: commentsArray
             });
         } catch (error) { // cacth error
             // show error to console

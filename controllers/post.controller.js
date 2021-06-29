@@ -54,6 +54,33 @@ module.exports = {
         }
     },
 
+    getAllPostByAuthorID: async (req, res) => {
+        try {
+            // get post data from firestore
+            var postData = await PostModel.getAllBy(`authorID`, `${req.query.authorID}`);
+            // if not exist
+            if (!postData)
+                return res.status(404).json({
+                    success: false,
+                    message: `post not exist.`,
+                });
+            // if exist, return result
+            return res.status(200).json({
+                success: true,
+                message: `get all post by author id.`,
+                posts: postData
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
     getPostByID: async (req, res) => {
         try {
             // get post data from firestore

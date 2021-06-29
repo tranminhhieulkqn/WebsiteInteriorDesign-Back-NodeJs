@@ -36,7 +36,7 @@ class PostModel extends Model {
     // combine firstName and lastName into fullName, etc.)
     toJSON() {
         return {
-            pid: this._id, // ID of Document stored in Cloud Firestore
+            id: this._id, // ID of Document stored in Cloud Firestore
             createdAt: this._createdAt, // ISO String format date of Document's creation.
             updatedAt: this._updatedAt, // ISO String format date of Document's last update.
             authorID: this.authorID,

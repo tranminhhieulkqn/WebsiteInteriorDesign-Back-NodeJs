@@ -7,6 +7,9 @@ router.route('/create')
 router.route('/get')
     .get(PostController.getAllPost);
 
+router.route('/getByAuthor')
+    .get(PostController.getAllPostByAuthorID);
+
 router.route('/getBy')
     .get(PostController.getPostByID);
 

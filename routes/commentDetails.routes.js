@@ -4,7 +4,7 @@ const CommentDetailsController = require('../controllers/commentDetails.controll
 router.route('/create')
     .post(CommentDetailsController.create);
 
-router.route('/get') // required post id in query param
+router.route('/getByPostID') // required post id in query param
     .get(CommentDetailsController.getAllCommentOfPost);
 
 router.route('/update') // required comment id in query param

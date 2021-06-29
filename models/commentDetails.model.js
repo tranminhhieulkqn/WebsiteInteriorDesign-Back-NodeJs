@@ -6,9 +6,11 @@ const { Model, schema, field } = require('firestore-schema-validator');
 const commentDetailsSchema = schema({
     postID: field('ID of Post').string().trim(),
     authorID: field('ID of the person who commented the Post').string().trim(),
+    displayNameAuthor: field('Author\'s Display Name').string().trim(),
     authorAvatar: field('Avatar of the person who commented the Post').string().trim(),
     content: field('Comment Content').string().trim(),
     rated: field('Rated').number(),
+    liked: field('List user liked comment.').array().default([]).nullable(),
     dateCreated: field('Date Created').date().nullable(),
 })
 
@@ -48,6 +50,7 @@ class CommentDetailsModel extends Model {
             updatedAt: this._updatedAt, // ISO String format date of Document's last update.
             postID: this.postID,
             authorID: this.authorID,
+            displayNameAuthor: this.displayNameAuthor,
             authorAvatar: this.authorAvatar,
             content: this.content,
             rated: this.rated,
