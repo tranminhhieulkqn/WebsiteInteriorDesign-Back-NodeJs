@@ -4,6 +4,12 @@ const CommentDetailsController = require('../controllers/commentDetails.controll
 router.route('/create')
     .post(CommentDetailsController.create);
 
+router.route('/like')
+    .post(CommentDetailsController.likeComment);
+
+router.route('/unlike')
+    .delete(CommentDetailsController.unlikeComment);
+
 router.route('/getByPostID') // required post id in query param
     .get(CommentDetailsController.getAllCommentOfPost);
 

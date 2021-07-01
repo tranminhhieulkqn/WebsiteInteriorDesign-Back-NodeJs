@@ -54,6 +54,7 @@ class CommentDetailsModel extends Model {
             authorAvatar: this.authorAvatar,
             content: this.content,
             rated: this.rated,
+            liked: this.liked,
             dateCreated: this.dateCreated,
         }
     }

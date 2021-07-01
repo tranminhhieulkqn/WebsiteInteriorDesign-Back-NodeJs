@@ -25,7 +25,63 @@ module.exports = {
             return res.status(200).json({
                 success: true,
                 message: 'comment created successfully.',
+                comment: commentCreated
             })
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
+    likeComment: async (req, res) => {
+        try {
+            let { commentID, userID } = req.query;
+            if (!commentID || !userID)
+                throw new Error('comment id and user id required.');
+            let commentData = await CommentDetailsModel.getById(`${commentID}`);
+            if (!commentData)
+                throw new Error('comment is not exists.');
+            commentData._data.liked.push(userID)
+            // update to firestore
+            await commentData.save();
+            // return result
+            return res.status(200).json({
+                success: true,
+                message: `user id = '${userID}' liked comment id = ${commentID}.`
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
+    unlikeComment: async (req, res) => {
+        try {
+            let { commentID, userID } = req.query;
+            if (!commentID || !userID)
+                throw new Error('comment id and user id required.');
+            let commentData = await CommentDetailsModel.getById(`${commentID}`);
+            if (!commentData)
+                throw new Error('comment is not exists.');
+            let indexDelete = commentData._data.liked.indexOf(userID)
+            commentData._data.liked.splice(indexDelete, 1)
+            // update to firestore
+            await commentData.save();
+            // return result
+            return res.status(200).json({
+                success: true,
+                message: `user id = '${userID}' unlike comment id = ${commentID}.`
+            });
         } catch (error) { // cacth error
             // show error to console
             console.error(error.message);
@@ -124,9 +180,11 @@ module.exports = {
         try {
             let commentID = req.query.id
             if (!commentID)
-                throw new Error('Comment ID required in query param.')
+                throw new Error('comment id required in query param.')
             // get post data from firestore
-            let commentDelete = await CommentDetailsModel.getById(`${commentID}`);
+            let commentDelete = await CommentDetailsModel.getById(`${commentID}`)
+            if (!commentDelete)
+                throw new Error('comment not exists.')
             // get post id to update
             let postID = commentDelete._data.postID;
             // delete post data on firestore

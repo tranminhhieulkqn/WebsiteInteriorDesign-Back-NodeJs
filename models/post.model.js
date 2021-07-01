@@ -17,7 +17,7 @@ const postSchema = schema({
     likeCount: field('Like Count').number().default(0),
     averageRating: field('Average Rating').number().default(0),
     mainColor: field('Main color').string().default(''),
-    patterns: field('Patterns').string().default('')
+    pattern: field('Pattern').string().default('')
 })
 
 class PostModel extends Model {
@@ -54,7 +54,7 @@ class PostModel extends Model {
             likeCount: this.likeCount,
             averageRating: this.averageRating,
             mainColor: this.mainColor,
-            patterns: this.patterns
+            pattern: this.pattern
         }
     }
 }
