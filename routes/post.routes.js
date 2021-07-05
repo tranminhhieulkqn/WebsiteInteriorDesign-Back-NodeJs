@@ -4,6 +4,12 @@ const PostController = require('../controllers/post.controller');
 router.route('/create')
     .post(PostController.create);
 
+router.route('/like')
+    .post(PostController.likePost);
+
+router.route('/unlike')
+    .delete(PostController.unlikePost);
+
 router.route('/get')
     .get(PostController.getAllPost);
 

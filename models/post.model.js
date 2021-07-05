@@ -14,10 +14,12 @@ const postSchema = schema({
     keywords: field('Keywords').array().default([]).nullable(),
     dateCreated: field('Date Created').date().nullable(),
     status: field('Post Status').string().default('draft'),
-    likeCount: field('Like Count').number().default(0),
+    liked: field('List Liked User').array().default([]),
     averageRating: field('Average Rating').number().default(0),
-    mainColor: field('Main color').string().default(''),
-    pattern: field('Pattern').string().default('')
+    mainColor: field('Main color').array().default([]),
+    pattern: field('Pattern').array().default([]),
+    displayNameAuthor: field('Author\'s Display Name').string().trim(),
+    authorAvatar: field('Avatar of the person who commented the Post').string().trim(),
 })
 
 class PostModel extends Model {
@@ -29,9 +31,6 @@ class PostModel extends Model {
         return postSchema
     }
 
-    get likeCount() {
-        return this.likeCount;
-    }
     // this.toJSON() by default returns this._data,
     // but you might want to display it differently
     // (eg. don't show password in responses,
@@ -51,10 +50,12 @@ class PostModel extends Model {
             keywords: this.keywords,
             dateCreated: this.dateCreated,
             status: this.status,
-            likeCount: this.likeCount,
+            liked: this.liked,
             averageRating: this.averageRating,
             mainColor: this.mainColor,
-            pattern: this.pattern
+            pattern: this.pattern,
+            displayNameAuthor: this.displayNameAuthor,
+            authorAvatar: this.authorAvatar
         }
     }
 }

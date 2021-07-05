@@ -26,6 +26,67 @@ module.exports = {
         }
     },
 
+    likePost: async (req, res) => {
+        try {
+            let { postID, userID } = req.query;
+            if (!postID || !userID)
+                throw new Error('post id and user id required.');
+            let postData = await PostModel.getById(`${postID}`);
+            if (!postData)
+                throw new Error('post is not exists.');
+            postData._data.liked.push(userID)
+            console.log(postData._data.liked);
+            // remove duplicates
+            postData._data.liked = postData._data.liked.filter((value, index, self) => {
+                return self.indexOf(value) === index;
+            })
+            console.log(postData._data.liked);
+            // update to firestore
+            await postData.save();
+            // return result
+            return res.status(200).json({
+                success: true,
+                message: `user id = '${userID}' liked post id = ${postID}.`
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
+    unlikePost: async (req, res) => {
+        try {
+            let { postID, userID } = req.query;
+            if (!postID || !userID)
+                throw new Error('post id and user id required.');
+            let postData = await PostModel.getById(`${postID}`);
+            if (!postData)
+                throw new Error('post is not exists.');
+            let indexDelete = postData._data.liked.indexOf(userID)
+            postData._data.liked.splice(indexDelete, 1)
+            // update to firestore
+            await postData.save();
+            // return result
+            return res.status(200).json({
+                success: true,
+                message: `user id = '${userID}' unlike post id = ${postID}.`
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
     getAllPost: async (req, res) => {
         try {
             // define posts array
