@@ -27,6 +27,7 @@ const uploadFileToStorage = async (file, bucketPath = '') => {
         blobStream.on("finish", () => {
             // The public URL can be used to directly access the file via HTTP.
             const fileURL = `https://storage.googleapis.com/${bucket.name}/${fileUpload.name}`;
+            console.log(fileURL);
             resolve(fileURL);
         });
         // end stream concat buffer of file
@@ -43,8 +44,10 @@ module.exports = {
                     success: false,
                     message: `no files found.`,
                 });
+            randomID = v4()
+            filename = randomID + '.' + file.originalname.split('.').pop()
             // get the bucket path
-            var bucketPath = req.body.bucketPath + file.originalname;
+            var bucketPath = req.body.bucketPath + filename;
             // upload file to firebase storage
             uploadFileToStorage(file, bucketPath)
                 .then((fileURL) => { // uploaded successfully
@@ -79,7 +82,7 @@ module.exports = {
             let fileURL = req.query.fileURL.replace(`https://storage.googleapis.com/interior-design-afc76.appspot.com/`, ``)
             console.log(fileURL);
             let desertRef = bucket.file(fileURL);
-            
+
             // Delete the file
             desertRef.delete().then(() => {
                 // File deleted successfully
