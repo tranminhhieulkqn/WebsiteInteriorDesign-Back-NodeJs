@@ -89,20 +89,68 @@ module.exports = {
 
     getAllPost: async (req, res) => {
         try {
+            let { pageSize, currentPage, search } = req.query;
+            pageSize = Number(pageSize)
+            currentPage = Number(currentPage)
             // define posts array
             var postsArray = [];
             // get posts data from firestore
-            var postsData = await PostModel._collectionRef.get();
+            var first;
+            var postsData;
+            if (pageSize > 0 && currentPage > 0) {
+                if (search) {
+                    first = await PostModel._collectionRef
+                        .orderBy('title')
+                        .where('title', '>=', search)
+                        .where('title', '<=', search + '\uf8ff')
+                        .orderBy('dateCreated', 'desc')
+                        .limit(pageSize * (currentPage - 1) + 1)
+                        .get();
+
+                    postsData = await PostModel._collectionRef
+                        .orderBy('title')
+                        .where('title', '>=', search)
+                        .where('title', '<=', search + '\uf8ff')
+                        .orderBy('dateCreated', 'desc')
+                        .startAt(first.docs[first.docs.length - 1].data().dateCreated)
+                        .limit(Number(pageSize))
+                        .get();
+                    console.log(111);
+                }
+                else {
+                    first = await PostModel._collectionRef
+                        .orderBy('dateCreated', 'desc')
+                        .limit(pageSize * (currentPage - 1) + 1)
+                        .get();
+
+                    postsData = await PostModel._collectionRef
+                        .orderBy('dateCreated', 'desc')
+                        .startAt(first.docs[first.docs.length - 1].data().dateCreated)
+                        .limit(Number(pageSize))
+                        .get();
+                    console.log("pageSize" + pageSize);
+                }
+            }
+            else
+                postsData = await PostModel._collectionRef.get();
+
             postsData.forEach(doc => {
                 post = doc.data();
                 post.id = doc.id;
                 postsArray.push(post); // push to postsArray
             })
+
+            postSize = await PostModel._collectionRef.get();
+            let totalItem = postSize.size | 0;
+            let totalPage = Math.ceil(postSize.size / pageSize) | 0
+
             // return result
             return res.status(200).json({
                 success: true,
                 message: "list of post.",
-                posts: postsArray
+                posts: postsArray,
+                totalItem: totalItem,
+                totalPage: totalPage
             });
         } catch (error) { // cacth error
             // show error to console

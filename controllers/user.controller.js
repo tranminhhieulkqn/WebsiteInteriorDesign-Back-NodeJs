@@ -125,6 +125,34 @@ module.exports = {
         }
     },
 
+    getAllByRole: async (req, res) => {
+        try {
+            // define users array
+            var usersArray = [];
+            // get users data from firestore
+            var usersData = await UserModel._collectionRef.get();
+            usersData.forEach(doc => {
+                user = doc.data();
+                user.id = doc.id;
+                usersArray.push(user); // push to usersArray
+            })
+            // return result
+            return res.status(200).json({
+                success: true,
+                message: "list of user.",
+                users: usersArray
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            })
+        }
+    },
+
     getUserBy: async (req, res) => {
         try {
             if (!req.query.id && !req.query.email)
