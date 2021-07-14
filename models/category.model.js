@@ -5,7 +5,11 @@ const { Model, schema, field } = require('firestore-schema-validator');
  */
 const categorySchema = schema({
     name: field('Name').string().trim(),
-    description: field('Description').string().trim().nullable(),
+    summary : field('Summary').string().trim().nullable(),
+    description_first: field('Description Fisrt').string().trim().nullable(),
+    description_second: field('Description Second').string().trim().nullable(),
+    images_feature: field('Image Feature').array().default([]).nullable(),
+    images: field('Image').array().default([]).nullable(),
 })
 
 class CategoryModel extends Model {
@@ -27,7 +31,8 @@ class CategoryModel extends Model {
             createdAt: this._createdAt, // ISO String format date of Document's creation.
             updatedAt: this._updatedAt, // ISO String format date of Document's last update.
             name: this.name,
-            description: this.description
+            description: this.description,
+            images: this.images,
         }
     }
 }
