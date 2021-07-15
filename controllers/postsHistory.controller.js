@@ -82,6 +82,8 @@ module.exports ={
         try {
             // get posts history data from firestore
             var postsHistoryData = await PostsHistoryModel.getById(`${req.query.id}`);
+            var viewed_posts =[]
+            var liked_posts =[]
             console.log(req.query.id);
             // if not exist
             if (!postsHistoryData)
@@ -89,24 +91,23 @@ module.exports ={
                     success: false,
                     message: `post history not exist.`,
                 });
-            // if exist, change category data
-            console.log("asbsbsbs")
-            
-           console.log(postsHistoryData['id'])
-
-
-            // categoryData._data = req.body;
-            // console.log(req.body);
-            // delete categoryData._data.cid;
-
-
+            //check axist liked post in req
+            if (req.body['liked_posts']){
+                postsHistoryData._data["liked_posts"].push(req.body['liked_posts'][0])//append to old list
+            }
+            //check axist viewed posts in req
+            if (req.body['viewed_posts']){
+                postsHistoryData._data["viewed_posts"].push(req.body['viewed_posts'][0])//append to old list
+            }
+            delete postsHistoryData._data.pid;
 
             // update to firestore
-            // await categoryData.save();
+            await postsHistoryData.save();
             // return result
             return res.status(200).json({
                 success: true,
-                // message: `category '${categoryData._data.name}' updated successfully.`
+                message: `post history updated successfully.`
+                
             });
         } catch (error) { // cacth error
             // show error to console
@@ -119,31 +120,31 @@ module.exports ={
         }
     },
 
-//     delete: async (req, res) => {
-//         try {
-//             // get category data from firestore
-//             var categoryData = await CategoryModel.getById(`${req.query.id}`);
-//             // if not exist
-//             if (!categoryData)
-//                 return res.status(200).json({
-//                     success: false,
-//                     message: `category not exist.`,
-//                 });
-//             // delete category data on firestore
-//             await categoryData.delete();
-//             return res.status(200).json({
-//                 success: true,
-//                 message: `category '${categoryData.name}' deleted successfully.`,
-//             })
-//         } catch (error) { // cacth error
-//             // show error to console
-//             console.error(error.message);
-//             // return error message
-//             return res.status(500).json({
-//                 success: false,
-//                 message: error.message
-//             });
-//         }
-//     }
+    delete: async (req, res) => {
+        try {
+            // get category data from firestore
+            var postsHistoryData = await PostsHistoryModel.getById(`${req.query.id}`);
+            // if not exist
+            if (!postsHistoryData)
+                return res.status(200).json({
+                    success: false,
+                    message: `Post History not exist.`,
+                });
+            // delete category data on firestore
+            await postsHistoryData.delete();
+            return res.status(200).json({
+                success: true,
+                message: `PostHistory  deleted successfully.`,
+            })
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    }
 
 }

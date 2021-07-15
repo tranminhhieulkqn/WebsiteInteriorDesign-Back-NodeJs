@@ -12,7 +12,7 @@ router.route('/getBy')
 router.route('/update')
     .put(PostsHistory.update);
 
-// router.route('/delete')
-//     .delete(CategoryController.delete);
+router.route('/delete')
+    .delete(PostsHistory.delete);
 
 module.exports = router;
