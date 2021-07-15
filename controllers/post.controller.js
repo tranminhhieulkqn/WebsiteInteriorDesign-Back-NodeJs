@@ -1,4 +1,43 @@
+const fs = require('fs');
+const natural = require('natural');
 const PostModel = require('../models/post.model');
+
+function ObTFIDF(id, weights) {
+    this.id = id;
+    this.weights = weights;
+}
+TfIdf = natural.TfIdf,
+    tfidf = new TfIdf();
+var ArrObject = []
+
+function removeVietnameseTones(str) {
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+    str = str.replace(/đ/g, "d");
+    str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+    str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+    str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+    str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+    str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+    str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+    str = str.replace(/Đ/g, "D");
+    // Some system encode vietnamese combining accent as individual utf-8 characters
+    // Một vài bộ encode coi các dấu mũ, dấu chữ như một kí tự riêng biệt nên thêm hai dòng này
+    str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // ̀ ́ ̃ ̉ ̣  huyền, sắc, ngã, hỏi, nặng
+    str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // ˆ ̆ ̛  Â, Ê, Ă, Ơ, Ư
+    // Remove extra spaces
+    // Bỏ các khoảng trắng liền nhau
+    str = str.replace(/ + /g, " ");
+    str = str.trim();
+    // Remove punctuations
+    // Bỏ dấu câu, kí tự đặc biệt
+    str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g, " ");
+    return str.toLowerCase();
+}
 
 module.exports = {
     create: async (req, res) => {
@@ -35,12 +74,11 @@ module.exports = {
             if (!postData)
                 throw new Error('post is not exists.');
             postData._data.liked.push(userID)
-            console.log(postData._data.liked);
             // remove duplicates
             postData._data.liked = postData._data.liked.filter((value, index, self) => {
                 return self.indexOf(value) === index;
             })
-            console.log(postData._data.liked);
+            postData._data.likesCount = postData._data.liked.length
             // update to firestore
             await postData.save();
             // return result
@@ -69,6 +107,8 @@ module.exports = {
                 throw new Error('post is not exists.');
             let indexDelete = postData._data.liked.indexOf(userID)
             postData._data.liked.splice(indexDelete, 1)
+            //
+            postData._data.likesCount = postData._data.liked.length
             // update to firestore
             await postData.save();
             // return result
@@ -249,6 +289,41 @@ module.exports = {
         }
     },
 
+    getLastPostsByAuthorID: async (req, res) => {
+        try {
+            // take by amount in query param or not default 1
+            let { amount, authorID } = req.query;
+            amount = amount | 1;
+            if (!authorID)
+                throw new Error('author id required.');
+            // define posts array get
+            var postsArray = [];
+            // get post data from firestore
+            var postsData = await PostModel._collectionRef
+                .orderBy('dateCreated', 'desc')
+                .where('authorID', '==', authorID)
+                .limit(amount).get();
+            postsData.forEach(doc => {
+                post = doc.data();
+                post.id = doc.id;
+                postsArray.push(post); // push to postsArray
+            })
+            return res.status(200).json({
+                success: true,
+                message: `data of post`,
+                posts: postsArray
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
     getFeaturedPosts: async (req, res) => {
         try {
             // take by amount in query param or not default 1
@@ -269,8 +344,10 @@ module.exports = {
             var postsArray = [];
             // get post data from firestore
             var postsData = await PostModel._collectionRef
-                .where('dateCreated', '>', monthAgo.toISOString())
                 .orderBy('dateCreated', 'desc')
+                .orderBy('likesCount', 'desc')
+                .orderBy('averageRating', 'desc')
+                .where('dateCreated', '>', monthAgo.toISOString())
                 .limit(amount).get();
             postsData.forEach(doc => {
                 post = doc.data();
@@ -281,6 +358,76 @@ module.exports = {
                 success: true,
                 message: `data of post`,
                 posts: postsArray
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
+    getRecommendedPosts: async (req, res) => {
+        try {
+            // take by amount in query param or not default 1
+            let amount = 1;
+            if (req.query.amount) {
+                amount = parseInt(req.query.amount);
+            }
+            // define posts array get
+            var postsArray = [];
+            // get post data from firestore
+            var postsData = await PostModel._collectionRef.orderBy('dateCreated', 'desc').limit(100).get();
+
+
+            postsData.forEach(doc => {
+                item = doc.data()
+                item.id = doc.id;
+                postsArray.push(item)
+                document = ''.concat(item.category, " ", item.category, " ",
+                    item.mainColor.join(' '), " ",
+                    item.pattern.join(' '), " ",
+                    item.displayNameAuthor, " ", item.displayNameAuthor)
+                console.log(document)
+                tfidf.addDocument(document)
+            })
+            tfidf.tfidfs("Interior Design Interior Design Beige-colored Polka Dot Tran Minh Hieu Tran Minh Hieu".toLocaleLowerCase(), function (i, measure) {
+                var ob = new ObTFIDF(id = postsArray[i].id, weights = measure)
+                ArrObject.push(ob);
+            });
+            ArrObject = ArrObject.sort((a, b) => parseFloat(b.weights) - parseFloat(a.weights))
+            console.log();
+            console.log();
+            // for (var i = 0; i < postsData.length; ++i) {
+            //     item = postsData[i]
+
+            //     document = ''.concat(item.category, " ", item.category, " ",
+            //         item.mainColor.join(' '), " ",
+            //         item.pattern.join(' '), " ",
+            //         item.displayNameAuthor, " ", item.displayNameAuthor)
+            //     console.log(document);
+            //     // tfidf.addDocument(postsData[i].Interior_type.toLowerCase() + " " + postsData[i].Interior_type.toLowerCase()
+            //     //     + " " + removeVietnameseTones(postsData[i].Color.toLowerCase())
+            //     //     + " " + removeVietnameseTones(postsData[i].Pattern.toLowerCase())
+            //     //     + " " + removeVietnameseTones(databases[i].Designer_name.toLowerCase()) + " " + removeVietnameseTones(databases[i].Designer_name.toLowerCase()));
+            // }
+            // tfidf.tfidfs(str.toLocaleLowerCase(), function (i, measure) {
+            //     var ob = new ObTFIDF(id = databases[i].id, weights = measure)
+            //     ArrObject.push(ob);
+            // });
+
+            // return ArrObject.sort((a, b) => parseFloat(b.weights) - parseFloat(a.weights))
+            // postsData.forEach(doc => {
+            //     post = doc.data();
+            //     post.id = doc.id;
+            //     postsArray.push(post); // push to postsArray
+            // })
+            return res.status(200).json({
+                success: true,
+                message: `data of post`,
             });
         } catch (error) { // cacth error
             // show error to console

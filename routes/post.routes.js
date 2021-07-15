@@ -22,8 +22,14 @@ router.route('/getBy')
 router.route('/getLast')
     .get(PostController.getLastPosts);
 
+router.route('/getLastByAuthor')
+    .get(PostController.getLastPostsByAuthorID);
+
 router.route('/getFeatured')
     .get(PostController.getFeaturedPosts);
+
+router.route('/getRecommended')
+    .get(PostController.getRecommendedPosts);
 
 router.route('/update')
     .put(PostController.update);
