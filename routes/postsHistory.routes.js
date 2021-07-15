@@ -1,18 +1,14 @@
 const router = require('express').Router();
 const PostsHistory = require('../controllers/postsHistory.controller');
 
-router.route('/create')
-    .post(PostsHistory.create);
-    router.route('/get')
+router.route('/view')
+    .post(PostsHistory.viewPost);
+
+router.route('/get')
     .get(PostsHistory.getAllPostsHistory);
 
 router.route('/getBy')
     .get(PostsHistory.getPostsHistoryByID);
 
-router.route('/update')
-    .put(PostsHistory.update);
-
-router.route('/delete')
-    .delete(PostsHistory.delete);
 
 module.exports = router;

@@ -4,14 +4,14 @@ const { Model, schema, field } = require('firestore-schema-validator');
  * Define schema Post in database.
  */
 const postsHistory = schema({
-    id_cus: field('ID customer').string().trim(),
-    viewed_posts: field('Posts Viewed').array().default([]).nullable(),
-    liked_posts: field('Posts Liked').array().default([]).nullable(),
+    userID: field('User ID').string().trim(),
+    viewedPosts: field('Viewed Posts').array().default([]).nullable(),
+    likedPosts: field('Liked Posts').array().default([]).nullable(),
 })
 
 class PostsHistoryModel extends Model {
     static get _collectionPath() {
-        return 'postsviewed'
+        return 'postsHistory'
     }
 
     static get _schema() {
@@ -24,12 +24,12 @@ class PostsHistoryModel extends Model {
     // combine firstName and lastName into fullName, etc.)
     toJSON() {
         return {
-            pid: this._id, // ID of Document stored in Cloud Firestore
+            id: this._id, // ID of Document stored in Cloud Firestore
             createdAt: this._createdAt, // ISO String format date of Document's creation.
             updatedAt: this._updatedAt, // ISO String format date of Document's last update.
-            id_cus: this.id_cus,
-            viewed_posts: this.viewed_posts,
-            liked_posts: this.liked_posts,
+            userID: this.userID,
+            viewedPosts: this.viewedPosts,
+            likedPosts: this.likedPosts,
         }
     }
 }

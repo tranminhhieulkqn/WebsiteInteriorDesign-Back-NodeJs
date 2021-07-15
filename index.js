@@ -54,7 +54,7 @@ app.use('/upload', UploadRoutes);
 app.use('/posts', PostRoutes);
 app.use('/comments', CommentDetailsRoutes);
 app.use('/category', CategoryRoutes);
-app.use('/postHistory', PostsHistory);
+app.use('/postsHistory', PostsHistory);
 
 // error handler, if request parameters do not fullfil validations a error message would be sent back as response.
 // app.use(function (error, req, res, next) {

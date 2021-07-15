@@ -1,29 +1,5 @@
 const PostsHistoryModel = require('../models/postsHistory.model')
-module.exports ={
-    create: async (req, res) => {
-        try {
-            postsHistoryData = req.body;
-            if (!postsHistoryData)
-                return res.status(404).json({
-                    success: false,
-                    message: 'no info postsHistory.'
-                });
-            var postsHistoryData = await PostsHistoryModel.create(postsHistoryData);
-            return res.status(200).json({
-                success: true,
-                message: 'postsHistory created successfully.',
-                postsHistory: postsHistoryData
-            })
-        } catch (error) { // cacth error
-            // show error to console
-            console.error(error.message);
-            // return error message
-            return res.status(500).json({
-                success: false,
-                message: error.message
-            });
-        }
-    },
+module.exports = {
     getAllPostsHistory: async (req, res) => {
         try {
             // define postsviewed array
@@ -38,7 +14,7 @@ module.exports ={
             // return result
             return res.status(200).json({
                 success: true,
-                message: "list of postsHistory.",
+                message: "list of posts history.",
                 postsHistory: postHistoryArray
             });
         } catch (error) { // cacth error
@@ -60,12 +36,12 @@ module.exports ={
             if (!postsHistoryData)
                 return res.status(404).json({
                     success: false,
-                    message: `Post History not exist.`,
+                    message: `post history not exist.`,
                 });
             // if exist, return result
             return res.status(200).json({
                 success: true,
-                message: `data of Post History`,
+                message: `data of post history`,
                 postshistory: postsHistoryData
             });
         } catch (error) { // cacth error
@@ -78,36 +54,49 @@ module.exports ={
             });
         }
     },
-    update: async (req, res) => {
+
+    viewPost: async (req, res) => {
         try {
             // get posts history data from firestore
-            var postsHistoryData = await PostsHistoryModel.getById(`${req.query.id}`);
-            var viewed_posts =[]
-            var liked_posts =[]
-            console.log(req.query.id);
-            // if not exist
-            if (!postsHistoryData)
-                return res.status(200).json({
-                    success: false,
-                    message: `post history not exist.`,
-                });
-            //check axist liked post in req
-            if (req.body['liked_posts']){
-                postsHistoryData._data["liked_posts"].push(req.body['liked_posts'][0])//append to old list
-            }
-            //check axist viewed posts in req
-            if (req.body['viewed_posts']){
-                postsHistoryData._data["viewed_posts"].push(req.body['viewed_posts'][0])//append to old list
-            }
-            delete postsHistoryData._data.pid;
+            let { postID, userID, liked } = req.query;
+            if (!postID || !userID)
+                throw new Error('post id and user id required.');
 
-            // update to firestore
-            await postsHistoryData.save();
+            var postsHistoryData = await PostsHistoryModel.getBy("userID", userID.toString());
+
+            if (postsHistoryData) {
+                // add new post ID to list
+                postsHistoryData._data.viewedPosts.push(postID)
+                // remove duplicates
+                postsHistoryData._data.viewedPosts = postsHistoryData._data.viewedPosts.filter(
+                    (value, index, self) => {
+                        return self.indexOf(value) === index;
+                    })
+                if (liked) {
+                    // add new post ID to list
+                    postsHistoryData._data.likedPosts.push(postID)
+                    // remove duplicates
+                    postsHistoryData._data.likedPosts = postsHistoryData._data.likedPosts.filter(
+                        (value, index, self) => {
+                            return self.indexOf(value) === index;
+                        })
+                }
+                // update to firestore
+                await postsHistoryData.save();
+            }
+            else { // if not exists => create new
+                postsHistoryData = await PostsHistoryModel.create({
+                    userID: userID,
+                    viewedPosts: [postID],
+                    likedPosts: (liked) ? [postID] : []
+                });
+            }
+
             // return result
             return res.status(200).json({
                 success: true,
                 message: `post history updated successfully.`
-                
+
             });
         } catch (error) { // cacth error
             // show error to console
@@ -119,32 +108,4 @@ module.exports ={
             });
         }
     },
-
-    delete: async (req, res) => {
-        try {
-            // get category data from firestore
-            var postsHistoryData = await PostsHistoryModel.getById(`${req.query.id}`);
-            // if not exist
-            if (!postsHistoryData)
-                return res.status(200).json({
-                    success: false,
-                    message: `Post History not exist.`,
-                });
-            // delete category data on firestore
-            await postsHistoryData.delete();
-            return res.status(200).json({
-                success: true,
-                message: `PostHistory  deleted successfully.`,
-            })
-        } catch (error) { // cacth error
-            // show error to console
-            console.error(error.message);
-            // return error message
-            return res.status(500).json({
-                success: false,
-                message: error.message
-            });
-        }
-    }
-
 }
