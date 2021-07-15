@@ -7,8 +7,8 @@ router.route('/view')
 router.route('/get')
     .get(PostsHistory.getAllPostsHistory);
 
-router.route('/getBy')
-    .get(PostsHistory.getPostsHistoryByID);
+router.route('/getByUser')
+    .get(PostsHistory.getPostsHistoryByUser);
 
 
 module.exports = router;

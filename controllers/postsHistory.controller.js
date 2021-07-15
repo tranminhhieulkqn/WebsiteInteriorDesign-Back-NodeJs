@@ -1,4 +1,5 @@
 const PostsHistoryModel = require('../models/postsHistory.model')
+
 module.exports = {
     getAllPostsHistory: async (req, res) => {
         try {
@@ -28,10 +29,13 @@ module.exports = {
         }
     },
 
-    getPostsHistoryByID: async (req, res) => {
+    getPostsHistoryByUser: async (req, res) => {
         try {
+            let { userID } = req.query;
             // get post history data from firestore
-            var postsHistoryData = await PostsHistoryModel.getById(`${req.query.id}`);
+            if (!userID)
+                throw new Error('user id required.');
+            var postsHistoryData = await PostsHistoryModel.getBy('userID', `${userID}`);
             // if not exist
             if (!postsHistoryData)
                 return res.status(404).json({
@@ -42,7 +46,7 @@ module.exports = {
             return res.status(200).json({
                 success: true,
                 message: `data of post history`,
-                postshistory: postsHistoryData
+                postsHistory: postsHistoryData
             });
         } catch (error) { // cacth error
             // show error to console

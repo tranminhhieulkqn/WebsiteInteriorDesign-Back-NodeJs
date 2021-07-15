@@ -1,14 +1,12 @@
 const fs = require('fs');
 const natural = require('natural');
 const PostModel = require('../models/post.model');
+const PostsHistoryModel = require('../models/postsHistory.model')
 
 function ObTFIDF(id, weights) {
     this.id = id;
     this.weights = weights;
 }
-TfIdf = natural.TfIdf,
-    tfidf = new TfIdf();
-var ArrObject = []
 
 function removeVietnameseTones(str) {
     str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
@@ -372,62 +370,77 @@ module.exports = {
 
     getRecommendedPosts: async (req, res) => {
         try {
-            // take by amount in query param or not default 1
-            let amount = 1;
-            if (req.query.amount) {
-                amount = parseInt(req.query.amount);
-            }
+            // get param from query request
+            let { amount, userID } = req.query;
+            amount = amount | 1; // if not exists => 1
+            if (!userID) // require user ID
+                throw new Error('post id and user id required.');
+
+            // get history viewed post from user ID
+            var viewedPostID = (await PostsHistoryModel.getBy('userID', `${userID}`))._data.viewedPosts;
+
+            // get viewed post user
+            viewedPost = await PostModel._collectionRef
+                .orderBy('dateCreated', 'desc')
+                .where('id', 'in', viewedPostID)
+                .get();
+
+            // create string to recommented posts
+            viewedPostsString = ''
+            viewedPost.forEach(doc => {
+                item = doc.data()
+                document = ''.concat(item.category, " ", // category
+                    item.mainColor.join(' '), " ", // mainColor
+                    item.pattern.join(' '), " ", // pattern
+                    item.title, " ", // title
+                    item.displayNameAuthor) // displayNameAuthor
+                viewedPostsString = viewedPostsString.concat(document, " ") // concat to des string 
+            })
+
             // define posts array get
             var postsArray = [];
-            // get post data from firestore
-            var postsData = await PostModel._collectionRef.orderBy('dateCreated', 'desc').limit(100).get();
 
+            // get post data from firestore to calculat vector
+            var postsData = await PostModel._collectionRef
+                .where('id', 'not-in', viewedPostID)
+                .limit(100).get();
 
+            TfIdf = natural.TfIdf, tfidf = new TfIdf();
+            var ArrObject = []
+
+            // add document to tfidf
             postsData.forEach(doc => {
                 item = doc.data()
                 item.id = doc.id;
-                postsArray.push(item)
-                document = ''.concat(item.category, " ", item.category, " ",
+                postsArray.push(item) // add to data return
+                document = ''.concat(item.category, " ",
                     item.mainColor.join(' '), " ",
                     item.pattern.join(' '), " ",
-                    item.displayNameAuthor, " ", item.displayNameAuthor)
-                console.log(document)
-                tfidf.addDocument(document)
+                    item.title, " ", item.displayNameAuthor)
+                // add document
+                tfidf.addDocument(removeVietnameseTones(document).toLocaleLowerCase())
             })
-            tfidf.tfidfs("Interior Design Interior Design Beige-colored Polka Dot Tran Minh Hieu Tran Minh Hieu".toLocaleLowerCase(), function (i, measure) {
+
+            // calculate
+            tfidf.tfidfs(removeVietnameseTones(viewedPostsString).toLocaleLowerCase(), function (i, measure) {
                 var ob = new ObTFIDF(id = postsArray[i].id, weights = measure)
                 ArrObject.push(ob);
             });
+            // sort with weights
             ArrObject = ArrObject.sort((a, b) => parseFloat(b.weights) - parseFloat(a.weights))
-            console.log();
-            console.log();
-            // for (var i = 0; i < postsData.length; ++i) {
-            //     item = postsData[i]
 
-            //     document = ''.concat(item.category, " ", item.category, " ",
-            //         item.mainColor.join(' '), " ",
-            //         item.pattern.join(' '), " ",
-            //         item.displayNameAuthor, " ", item.displayNameAuthor)
-            //     console.log(document);
-            //     // tfidf.addDocument(postsData[i].Interior_type.toLowerCase() + " " + postsData[i].Interior_type.toLowerCase()
-            //     //     + " " + removeVietnameseTones(postsData[i].Color.toLowerCase())
-            //     //     + " " + removeVietnameseTones(postsData[i].Pattern.toLowerCase())
-            //     //     + " " + removeVietnameseTones(databases[i].Designer_name.toLowerCase()) + " " + removeVietnameseTones(databases[i].Designer_name.toLowerCase()));
-            // }
-            // tfidf.tfidfs(str.toLocaleLowerCase(), function (i, measure) {
-            //     var ob = new ObTFIDF(id = databases[i].id, weights = measure)
-            //     ArrObject.push(ob);
-            // });
+            // amout post get
+            amount = (amount < postsArray.length) ? amount : postsArray.length;
 
-            // return ArrObject.sort((a, b) => parseFloat(b.weights) - parseFloat(a.weights))
-            // postsData.forEach(doc => {
-            //     post = doc.data();
-            //     post.id = doc.id;
-            //     postsArray.push(post); // push to postsArray
-            // })
+            let results = []
+            for (let index = 0; index < amount; index++) {
+                results.push(postsArray[postsArray.findIndex(post => post.id === ArrObject[index].id)])
+            }
+
             return res.status(200).json({
                 success: true,
                 message: `data of post`,
+                posts: results
             });
         } catch (error) { // cacth error
             // show error to console
