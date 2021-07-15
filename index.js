@@ -47,13 +47,14 @@ const UploadRoutes = require('./routes/upload.routes');
 const PostRoutes = require('./routes/post.routes');
 const CommentDetailsRoutes = require('./routes/commentDetails.routes');
 const CategoryRoutes = require('./routes/category.routes');
+const PostsHistory = require('./routes/postsHistory.routes');
 app.use('/', IndexRoutes);
 app.use('/users', UserRoutes);
 app.use('/upload', UploadRoutes);
 app.use('/posts', PostRoutes);
 app.use('/comments', CommentDetailsRoutes);
 app.use('/category', CategoryRoutes);
-
+app.use('/postHistory', PostsHistory);
 
 // error handler, if request parameters do not fullfil validations a error message would be sent back as response.
 // app.use(function (error, req, res, next) {
