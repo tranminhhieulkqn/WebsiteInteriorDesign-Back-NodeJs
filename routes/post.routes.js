@@ -13,6 +13,9 @@ router.route('/unlike')
 router.route('/get')
     .get(PostController.getAllPost);
 
+router.route('/getPublic')
+    .get(PostController.getAllPostPublic);
+
 router.route('/getByAuthor')
     .get(PostController.getAllPostByAuthorID);
 

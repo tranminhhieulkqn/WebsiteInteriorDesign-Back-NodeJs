@@ -20,6 +20,12 @@ router.route('/login')
 router.route('/get')
     .get(UserController.getAllUser);
 
+router.route('/getWithPagination')
+    .get(UserController.getUserPagination);
+
+router.route('/getByRole')
+    .get(UserController.getAllByRole);
+
 // request parameter query: id(userID) or email
 router.route('/getBy')
     .get(UserController.getUserBy);

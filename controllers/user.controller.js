@@ -2,6 +2,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const config = require('../configs/configs');
 const UserModel = require('../models/user.model');
+const CommentDetailsModel = require('../models/commentDetails.model');
+const PostModel = require('../models/post.model');
 
 const saltRounds = 10;
 
@@ -125,22 +127,130 @@ module.exports = {
         }
     },
 
-    getAllByRole: async (req, res) => {
+    getUserPagination: async (req, res) => {
         try {
+            let { pageSize, currentPage, search, orderBy } = req.query;
+
+            pageSize = Number(pageSize)
+            currentPage = Number(currentPage)
+            search = search
+            orderBy = orderBy || 'displayName'
+            console.log(orderBy);
+            // orderBy = "displayName"
+
+
+            // Get size all user and on page
+            userSize = await UserModel._collectionRef
+                .where(orderBy, '>=', search)
+                .where(orderBy, '<=', search + '\uf8ff')
+                .get();
+            let totalItem = userSize.size || 0;
+            let totalPage = Math.ceil(userSize.size / pageSize) || 0
+
             // define users array
             var usersArray = [];
-            // get users data from firestore
-            var usersData = await UserModel._collectionRef.get();
-            usersData.forEach(doc => {
-                user = doc.data();
-                user.id = doc.id;
-                usersArray.push(user); // push to usersArray
-            })
+            first = await UserModel._collectionRef
+                .orderBy(orderBy)
+                .where(orderBy, '>=', search)
+                .where(orderBy, '<=', search + '\uf8ff')
+                .limit(pageSize * (currentPage - 1) + 1)
+                .get();
+
+            try {
+                usersData = await UserModel._collectionRef
+                    .orderBy(orderBy)
+                    .where(orderBy, '>=', search)
+                    .where(orderBy, '<=', search + '\uf8ff')
+                    .startAt(first.docs[first.docs.length - 1].data()[orderBy])
+                    .limit(Number(pageSize))
+                    .get();
+
+                usersData.forEach(doc => {
+                    user = doc.data();
+                    user.id = doc.id;
+                    usersArray.push(user); // push to usersArray
+                })
+            } catch (error) {
+
+            }
+
+
             // return result
             return res.status(200).json({
                 success: true,
                 message: "list of user.",
-                users: usersArray
+                users: usersArray,
+                totalItem: totalItem,
+                totalPage: totalPage
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            })
+        }
+    },
+
+    getAllByRole: async (req, res) => {
+        try {
+            let { role, pageSize, currentPage, search, orderBy } = req.query;
+            role = role || 'admin'
+            pageSize = Number(pageSize)
+            currentPage = Number(currentPage)
+            search = search
+            orderBy = orderBy || 'displayName'
+            // console.log(orderBy);
+            // orderBy = "displayName"
+
+
+            // Get size all user and on page
+            userSize = await UserModel._collectionRef
+                .where('role', '==', role)
+                .where(orderBy, '>=', search)
+                .where(orderBy, '<=', search + '\uf8ff')
+                .get();
+            let totalItem = userSize.size || 0;
+            let totalPage = Math.ceil(userSize.size / pageSize) || 0
+
+            // define users array
+            var usersArray = [];
+            first = await UserModel._collectionRef
+                .where('role', '==', role)
+                .orderBy(orderBy)
+                .where(orderBy, '>=', search)
+                .where(orderBy, '<=', search + '\uf8ff')
+                .limit(pageSize * (currentPage - 1) + 1)
+                .get();
+
+            try {
+                usersData = await UserModel._collectionRef
+                    .where('role', '==', role)
+                    .orderBy(orderBy)
+                    .where(orderBy, '>=', search)
+                    .where(orderBy, '<=', search + '\uf8ff')
+                    .startAt(first.docs[first.docs.length - 1].data()[orderBy])
+                    .limit(Number(pageSize))
+                    .get();
+
+                usersData.forEach(doc => {
+                    user = doc.data();
+                    user.id = doc.id;
+                    usersArray.push(user); // push to usersArray
+                })
+            } catch (error) {
+
+            }
+
+            // return result
+            return res.status(200).json({
+                success: true,
+                message: "list of user.",
+                users: usersArray,
+                totalItem: totalItem,
+                totalPage: totalPage
             });
         } catch (error) { // cacth error
             // show error to console
@@ -196,6 +306,23 @@ module.exports = {
                     success: false,
                     message: `user not exist.`,
                 });
+
+            if (req.body.avatarURL || req.body.displayName) { // update avatar user comment
+                let userComments = await CommentDetailsModel.getAllBy('authorID', userData?._data.uid)
+                userComments.forEach(async (element) => {
+                    element._data.authorAvatar = req.body.avatarURL || element._data.authorAvatar;
+                    element._data.displayNameAuthor = req.body.displayName || element._data.displayNameAuthor;
+                    await element.save();
+                });
+
+                let postCreated = await PostModel.getAllBy('authorID', userData?._data.uid)
+                postCreated.forEach(async (element) => {
+                    element._data.authorAvatar = req.body.avatarURL || element._data.authorAvatar;
+                    element._data.displayNameAuthor = req.body.displayName || element._data.displayNameAuthor;
+                    await element.save();
+                });
+            }
+
             // if exist, change user data
             userData._data = Object.assign(userData._data, req.body);
             delete userData._data.id
