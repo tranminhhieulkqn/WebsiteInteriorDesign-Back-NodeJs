@@ -130,9 +130,9 @@ module.exports = {
 
             let { pageSize, currentPage, search, orderBy } = req.query;
 
-            pageSize = Number(pageSize)
-            currentPage = Number(currentPage)
-            search = search
+            pageSize = Number(pageSize) || 10
+            currentPage = Number(currentPage) || 1
+            search = search || ''
             orderBy = orderBy || 'title'
 
             // Get size all user and on page
@@ -392,19 +392,31 @@ module.exports = {
     getLastPosts: async (req, res) => {
         try {
             // take by amount in query param or not default 1
-            let amount = 1;
-            if (req.query.amount) {
-                amount = parseInt(req.query.amount);
-            }
+
+            let { amount } = req.query;
+
+            amount = parseInt(amount) || 1;
+
             // define posts array get
             var postsArray = [];
+
             // get post data from firestore
-            var postsData = await PostModel._collectionRef.orderBy('dateCreated', 'desc').limit(amount).get();
-            postsData.forEach(doc => {
-                post = doc.data();
-                post.id = doc.id;
-                postsArray.push(post); // push to postsArray
-            })
+            var postsData = await PostModel._collectionRef
+                .where('status', '==', 'public')
+                .orderBy('dateCreated', 'desc')
+                .limit(amount)
+                .get();
+
+            try {
+                postsData.forEach(doc => {
+                    post = doc.data();
+                    post.id = doc.id;
+                    postsArray.push(post); // push to postsArray
+                })
+            } catch (error) {
+
+            }
+
             return res.status(200).json({
                 success: true,
                 message: `data of post`,
