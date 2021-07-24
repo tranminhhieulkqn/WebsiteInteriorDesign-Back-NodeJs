@@ -48,6 +48,8 @@ const PostRoutes = require('./routes/post.routes');
 const CommentDetailsRoutes = require('./routes/commentDetails.routes');
 const CategoryRoutes = require('./routes/category.routes');
 const PostsHistory = require('./routes/postsHistory.routes');
+const PredictResult = require('./routes/predictResult.routes')
+app.use('/predictResult',PredictResult)
 app.use('/', IndexRoutes);
 app.use('/users', UserRoutes);
 app.use('/upload', UploadRoutes);
