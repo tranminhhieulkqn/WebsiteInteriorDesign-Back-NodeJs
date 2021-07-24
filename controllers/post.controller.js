@@ -263,6 +263,78 @@ module.exports = {
         }
     },
 
+    getAllPostByAuthor: async (req, res) => {
+        try {
+
+            let { pageSize, currentPage, search, orderBy, authorID } = req.query;
+
+            pageSize = Number(pageSize)
+            currentPage = Number(currentPage)
+            search = search
+            orderBy = orderBy || 'title'
+            authorID = authorID
+
+            // Get size all user and on page
+            postSize = await PostModel._collectionRef
+                .where('authorID', '==', authorID)
+                .where(orderBy, '>=', search)
+                .where(orderBy, '<=', search + '\uf8ff')
+                .get();
+
+            let totalItem = postSize.size || 0;
+            let totalPage = Math.ceil(postSize.size / pageSize) || 0
+
+            // define posts array
+            var postsArray = [];
+            // get posts data from firestore
+            var postsData;
+
+            first = await PostModel._collectionRef
+                .where('authorID', '==', authorID)
+                .orderBy(orderBy)
+                .where(orderBy, '>=', search)
+                .where(orderBy, '<=', search + '\uf8ff')
+                .limit(pageSize * (currentPage - 1) + 1)
+                .get();
+
+            try {
+                postsData = await PostModel._collectionRef
+                    .where('authorID', '==', authorID)
+                    .orderBy(orderBy)
+                    .where(orderBy, '>=', search)
+                    .where(orderBy, '<=', search + '\uf8ff')
+                    .startAt(first.docs[first.docs.length - 1].data()[orderBy])
+                    .limit(Number(pageSize))
+                    .get();
+
+                postsData.forEach(doc => {
+                    post = doc.data();
+                    post.id = doc.id;
+                    postsArray.push(post); // push to postsArray
+                })
+            } catch (error) {
+
+            }
+
+            // return result
+            return res.status(200).json({
+                success: true,
+                message: "list of post.",
+                posts: postsArray,
+                totalItem: totalItem,
+                totalPage: totalPage
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
     getAllPostByAuthorID: async (req, res) => {
         try {
             // get post data from firestore

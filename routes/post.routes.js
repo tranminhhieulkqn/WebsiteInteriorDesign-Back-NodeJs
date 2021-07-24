@@ -16,6 +16,9 @@ router.route('/get')
 router.route('/getPublic')
     .get(PostController.getAllPostPublic);
 
+router.route('/getByAuthorID')
+    .get(PostController.getAllPostByAuthor);
+
 router.route('/getByAuthor')
     .get(PostController.getAllPostByAuthorID);
 
