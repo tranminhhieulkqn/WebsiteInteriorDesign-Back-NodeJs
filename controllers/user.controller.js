@@ -156,6 +156,9 @@ module.exports = {
                 .limit(pageSize * (currentPage - 1) + 1)
                 .get();
 
+            console.log(pageSize * (currentPage - 1) + 1);
+            console.log(first.docs.length - 1);
+
             try {
                 usersData = await UserModel._collectionRef
                     .orderBy(orderBy)

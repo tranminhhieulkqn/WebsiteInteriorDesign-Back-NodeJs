@@ -25,6 +25,9 @@ router.route('/getByAuthor')
 router.route('/getBy')
     .get(PostController.getPostByID);
 
+router.route('/getByCategory')
+    .get(PostController.getPostByCategory);
+
 router.route('/getLast')
     .get(PostController.getLastPosts);
 

@@ -5,7 +5,10 @@ router.route('/create')
     .post(PredictResult.create);
 
 router.route('/get')
-    .get(PredictResult.getAllPredictResult);
+    .get(PredictResult.getAll);
+
+router.route('/getByUser')
+    .get(PredictResult.getAllByUser);
 
 router.route('/update')
     .put(PredictResult.update);

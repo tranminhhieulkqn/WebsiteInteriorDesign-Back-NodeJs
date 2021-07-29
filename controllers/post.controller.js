@@ -37,6 +37,14 @@ function removeVietnameseTones(str) {
     return str.toLowerCase();
 }
 
+function getMostFrequent(arr) {
+    const hashmap = arr.reduce((acc, val) => {
+        acc[val] = (acc[val] || 0) + 1
+        return acc
+    }, {})
+    return Object.keys(hashmap).reduce((a, b) => hashmap[a] > hashmap[b] ? a : b)
+}
+
 module.exports = {
     create: async (req, res) => {
         try {
@@ -389,6 +397,45 @@ module.exports = {
         }
     },
 
+    getPostByCategory: async (req, res) => {
+        try {
+            // get post data from firestore
+            let { category, amount } = req.query;
+            amount = Number(amount) || 1
+
+            var postsData = await PostModel._collectionRef
+                .where('category', '==', `${category}`)
+                .limit(amount)
+                .get();
+
+            // define posts array get
+            var postsArray = [];
+
+            try {
+                postsData.forEach(doc => {
+                    post = doc.data();
+                    post.id = doc.id;
+                    postsArray.push(post); // push to postsArray
+                })
+            } catch (error) { console.log(error); }
+
+            // if exist, return result
+            return res.status(200).json({
+                success: true,
+                message: `data of posts`,
+                posts: postsArray
+            });
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+    },
+
     getLastPosts: async (req, res) => {
         try {
             // take by amount in query param or not default 1
@@ -483,15 +530,14 @@ module.exports = {
             // define time month ago
             var monthAgo = new Date();
             monthAgo.setMonth(monthAgo.getMonth() - monthago);
-            console.log(monthAgo.toISOString())
+
             // define posts array get
             var postsArray = [];
             // get post data from firestore
             var postsData = await PostModel._collectionRef
-                .orderBy('dateCreated', 'desc')
                 .orderBy('likesCount', 'desc')
                 .orderBy('averageRating', 'desc')
-                .where('dateCreated', '>', monthAgo.toISOString())
+                .orderBy('dateCreated', 'desc')
                 .limit(amount).get();
             postsData.forEach(doc => {
                 post = doc.data();
@@ -518,13 +564,12 @@ module.exports = {
         try {
             // get param from query request
             let { amount, userID } = req.query;
-            amount = amount | 1; // if not exists => 1
+            amount = amount || 1; // if not exists => 1
             if (!userID) // require user ID
                 throw new Error('post id and user id required.');
 
             // get history viewed post from user ID
-            var viewedPostID = (await PostsHistoryModel.getBy('userID', `${userID}`))._data.viewedPosts.slice(-5);
-            console.log(viewedPostID.length);
+            var viewedPostID = (await PostsHistoryModel.getBy('userID', `${userID}`))._data.viewedPosts;
 
             // get viewed post user
             viewedPost = await PostModel._collectionRef
@@ -532,17 +577,24 @@ module.exports = {
                 .where('id', 'in', viewedPostID)
                 .get();
 
-            // create string to recommented posts
-            viewedPostsString = ''
+            categoryArray = []
+            mainColorArray = []
+            patternArray = []
+
             viewedPost.forEach(doc => {
-                item = doc.data()
-                document = ''.concat(item.category, " ", // category
-                    item.mainColor.join(' '), " ", // mainColor
-                    item.pattern.join(' '), " ", // pattern
-                    item.title, " ", // title
-                    item.displayNameAuthor) // displayNameAuthor
-                viewedPostsString = viewedPostsString.concat(document, " ") // concat to des string 
+                item = doc.data();
+                categoryArray.push(item.category);
+                mainColorArray = mainColorArray.concat(item.mainColor)
+                patternArray = patternArray.concat(item.pattern)
             })
+
+            categoryArray = getMostFrequent(categoryArray)
+            mainColorArray = getMostFrequent(mainColorArray)
+            patternArray = getMostFrequent(patternArray)
+
+            // create string to recommented posts
+            viewedPostsString = ''.concat(categoryArray, " ", mainColorArray, " ", patternArray)
+            console.log(viewedPostsString)
 
             // define posts array get
             var postsArray = [];
@@ -562,8 +614,7 @@ module.exports = {
                 postsArray.push(item) // add to data return
                 document = ''.concat(item.category, " ",
                     item.mainColor.join(' '), " ",
-                    item.pattern.join(' '), " ",
-                    item.title, " ", item.displayNameAuthor)
+                    item.pattern.join(' '))
                 // add document
                 tfidf.addDocument(removeVietnameseTones(document).toLocaleLowerCase())
             })
@@ -581,6 +632,8 @@ module.exports = {
 
             let results = []
             for (let index = 0; index < amount; index++) {
+                let temp = postsArray[postsArray.findIndex(post => post.id === ArrObject[index].id)]
+                console.log(temp.category, " ", temp.mainColor, " ", temp.pattern);
                 results.push(postsArray[postsArray.findIndex(post => post.id === ArrObject[index].id)])
             }
 
