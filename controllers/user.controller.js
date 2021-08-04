@@ -2,8 +2,57 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const config = require('../configs/configs');
 const UserModel = require('../models/user.model');
-const CommentDetailsModel = require('../models/commentDetails.model');
 const PostModel = require('../models/post.model');
+const UserRecordsModel = require('../models/userRecords.model');
+const CommentDetailsModel = require('../models/commentDetails.model');
+const fs = require('fs');
+const natural = require('natural');
+
+function ObTFIDF(id, weights) {
+    this.id = id;
+    this.weights = weights;
+}
+
+function removeVietnameseTones(str) {
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+    str = str.replace(/đ/g, "d");
+    str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+    str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+    str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+    str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+    str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+    str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+    str = str.replace(/Đ/g, "D");
+    // Some system encode vietnamese combining accent as individual utf-8 characters
+    // Một vài bộ encode coi các dấu mũ, dấu chữ như một kí tự riêng biệt nên thêm hai dòng này
+    str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // ̀ ́ ̃ ̉ ̣  huyền, sắc, ngã, hỏi, nặng
+    str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // ˆ ̆ ̛  Â, Ê, Ă, Ơ, Ư
+    // Remove extra spaces
+    // Bỏ các khoảng trắng liền nhau
+    str = str.replace(/ + /g, " ");
+    str = str.trim();
+    // Remove punctuations
+    // Bỏ dấu câu, kí tự đặc biệt
+    str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g, " ");
+    return str.toLowerCase();
+}
+
+function getMostFrequent(arr) {
+    try {
+        const hashmap = arr.reduce((acc, val) => {
+            acc[val] = (acc[val] || 0) + 1
+            return acc
+        }, {})
+        return Object.keys(hashmap).reduce((a, b) => hashmap[a] > hashmap[b] ? a : b)
+    } catch (error) {
+        return ''
+    }
+}
 
 const saltRounds = 10;
 
@@ -402,5 +451,115 @@ module.exports = {
                 message: error.message
             })
         }
+    },
+
+    getRecommendedDesignerbyIDUser: async (req, res) => {
+        try {
+            // get param from query request
+            let { amount, userID } = req.query;
+            amount = amount || 1; // if not exists => 1
+            if (!userID) // require user ID
+                throw new Error('post id and user id required.');
+
+            // get history viewed post from user ID
+            var userRecords = await UserRecordsModel.getBy('userID', `${userID}`);
+            var favoriteStyles = userRecords._data.favoriteStyles.slice(-5);
+            var viewedPostID = userRecords._data.viewedPosts.slice(-10);
+
+            // get viewed post user
+            viewedPost = await PostModel._collectionRef
+                .orderBy('dateCreated', 'desc')
+                .where('id', 'in', viewedPostID)
+                .get();
+
+            categoryArray = []
+            mainColorArray = []
+            patternArray = []
+
+            viewedPost.forEach(doc => {
+                item = doc.data();
+                categoryArray.push(item.category);
+                mainColorArray = mainColorArray.concat(item.mainColor)
+                patternArray = patternArray.concat(item.pattern)
+            })
+
+
+            categoryArray = getMostFrequent(categoryArray.concat(favoriteStyles)) || ''
+            mainColorArray = getMostFrequent(mainColorArray) || ''
+            patternArray = getMostFrequent(patternArray) || ''
+
+            // create string to recommented posts
+            viewedPostsString = ''.concat(categoryArray, " ", mainColorArray, " ", patternArray)
+
+            // Việt
+            TfIdf = natural.TfIdf, tfidf = new TfIdf();
+            var ArrObject = []
+
+            var designerArray = await UserModel._collectionRef.where('role', "==", 'designer').get()
+            designersID = []
+            designersDataArray = []
+            designerArray.forEach(async (designer) => {
+                // Save infor designer
+                item = designer.data()
+                item.id = designer.id;
+                designersDataArray.push(item)
+            });
+
+            for (let index = 0; index < designersDataArray.length; index++) {
+                const designer = designersDataArray[index];
+                var categoryArray = []
+                var colorArray = []
+                var patternArray = []
+                var postsData = await PostModel.getAllBy(`authorID`, `${designer.id}`)
+                if (postsData.length) {
+                    postsData.forEach(element => {
+                        categoryArray.push(element._data['category'])
+                        colorArray = colorArray.concat(element._data['mainColor'])
+                        patternArray = patternArray.concat(element._data['pattern'])
+                    });
+                    designersID.push(designer.id)
+                    // add feature to list tfidf
+                    document = ''.concat(getMostFrequent(categoryArray), " ", getMostFrequent(colorArray), " ", getMostFrequent(patternArray))
+                    // console.log(document, " ", designer.id)
+                    tfidf.addDocument(document)
+                }
+            }
+
+            tfidf.tfidfs(removeVietnameseTones(viewedPostsString).toLocaleLowerCase(), function (i, measure) {
+                var ob = new ObTFIDF(id = designersID[i], weights = measure)
+                ArrObject.push(ob);
+            });
+
+            // sort with weights
+            ArrObject = ArrObject.sort((a, b) => parseFloat(b.weights) - parseFloat(a.weights))
+            
+            // amout post get
+            amount = (amount < designersID.length) ? amount : designersID.length;
+
+            let results = []
+
+            for (let index = 0; index < amount; index++) {
+                let temp = designersDataArray[designersDataArray.findIndex(post => post.id === ArrObject[index].id)]
+                results.push(designersDataArray[designersDataArray.findIndex(post => post.id === ArrObject[index].id)])
+            }
+
+            console.log(results);
+
+            return res.status(200).json({
+                success: false,
+                message: `data of designer`,
+                designers: results
+            });
+
+        } catch (error) { // cacth error
+            // show error to console
+            console.error(error.message);
+            // return error message
+            return res.status(500).json({
+                success: false,
+                message: error.message
+            });
+        }
+
     }
 }

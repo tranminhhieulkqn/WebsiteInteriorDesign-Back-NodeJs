@@ -47,7 +47,7 @@ const UploadRoutes = require('./routes/upload.routes');
 const PostRoutes = require('./routes/post.routes');
 const CommentDetailsRoutes = require('./routes/commentDetails.routes');
 const CategoryRoutes = require('./routes/category.routes');
-const PostsHistory = require('./routes/postsHistory.routes');
+const UserRecords = require('./routes/userRecords.routes');
 const PredictResult = require('./routes/predictResult.routes')
 const Appointment = require('./routes/appointment.routes')
 app.use('/', IndexRoutes);
@@ -56,7 +56,7 @@ app.use('/upload', UploadRoutes);
 app.use('/posts', PostRoutes);
 app.use('/comments', CommentDetailsRoutes);
 app.use('/category', CategoryRoutes);
-app.use('/postsHistory', PostsHistory);
+app.use('/userRecords', UserRecords);
 app.use('/predictResult', PredictResult)
 app.use('/appointment', Appointment)
 

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const natural = require('natural');
 const PostModel = require('../models/post.model');
-const PostsHistoryModel = require('../models/postsHistory.model')
+const UserRecordsModel = require('../models/userRecords.model')
 
 function ObTFIDF(id, weights) {
     this.id = id;
@@ -38,11 +38,15 @@ function removeVietnameseTones(str) {
 }
 
 function getMostFrequent(arr) {
-    const hashmap = arr.reduce((acc, val) => {
-        acc[val] = (acc[val] || 0) + 1
-        return acc
-    }, {})
-    return Object.keys(hashmap).reduce((a, b) => hashmap[a] > hashmap[b] ? a : b)
+    try {
+        const hashmap = arr.reduce((acc, val) => {
+            acc[val] = (acc[val] || 0) + 1
+            return acc
+        }, {})
+        return Object.keys(hashmap).reduce((a, b) => hashmap[a] > hashmap[b] ? a : b)
+    } catch (error) {
+        return ''
+    }
 }
 
 module.exports = {
@@ -569,7 +573,9 @@ module.exports = {
                 throw new Error('post id and user id required.');
 
             // get history viewed post from user ID
-            var viewedPostID = (await PostsHistoryModel.getBy('userID', `${userID}`))._data.viewedPosts;
+            var userRecords = await UserRecordsModel.getBy('userID', `${userID}`);
+            var favoriteStyles = userRecords._data.favoriteStyles.slice(-5);
+            var viewedPostID = userRecords._data.viewedPosts.slice(-10);
 
             // get viewed post user
             viewedPost = await PostModel._collectionRef
@@ -588,13 +594,13 @@ module.exports = {
                 patternArray = patternArray.concat(item.pattern)
             })
 
-            categoryArray = getMostFrequent(categoryArray)
-            mainColorArray = getMostFrequent(mainColorArray)
-            patternArray = getMostFrequent(patternArray)
+
+            categoryArray = getMostFrequent(categoryArray.concat(favoriteStyles)) || ''
+            mainColorArray = getMostFrequent(mainColorArray) || ''
+            patternArray = getMostFrequent(patternArray) || ''
 
             // create string to recommented posts
             viewedPostsString = ''.concat(categoryArray, " ", mainColorArray, " ", patternArray)
-            console.log(viewedPostsString)
 
             // define posts array get
             var postsArray = [];

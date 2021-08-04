@@ -26,6 +26,9 @@ router.route('/getWithPagination')
 router.route('/getByRole')
     .get(UserController.getAllByRole);
 
+router.route('/getByRecommendedDesigner')
+    .get(UserController.getRecommendedDesignerbyIDUser);
+
 // request parameter query: id(userID) or email
 router.route('/getBy')
     .get(UserController.getUserBy);

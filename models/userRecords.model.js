@@ -3,19 +3,20 @@ const { Model, schema, field } = require('firestore-schema-validator');
 /**
  * Define schema Post in database.
  */
-const postsHistory = schema({
+const userRecords = schema({
     userID: field('User ID').string().trim(),
     viewedPosts: field('Viewed Posts').array().default([]).nullable(),
     likedPosts: field('Liked Posts').array().default([]).nullable(),
+    favoriteStyles: field('Favorite Styles').array().default([]).nullable(),
 })
 
-class PostsHistoryModel extends Model {
+class UserRecordsModel extends Model {
     static get _collectionPath() {
-        return 'postsHistory'
+        return 'userRecords'
     }
 
     static get _schema() {
-        return postsHistory
+        return userRecords
     }
 
     // this.toJSON() by default returns this._data,
@@ -30,8 +31,9 @@ class PostsHistoryModel extends Model {
             userID: this.userID,
             viewedPosts: this.viewedPosts,
             likedPosts: this.likedPosts,
+            favoriteStyles: this.favoriteStyles
         }
     }
 }
 
-module.exports = PostsHistoryModel;
+module.exports = UserRecordsModel;
