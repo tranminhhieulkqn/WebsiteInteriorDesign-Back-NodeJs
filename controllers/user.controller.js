@@ -184,7 +184,7 @@ module.exports = {
             currentPage = Number(currentPage)
             search = search
             orderBy = orderBy || 'displayName'
-            console.log(orderBy);
+            // console.log(orderBy);
             // orderBy = "displayName"
 
 
@@ -205,8 +205,8 @@ module.exports = {
                 .limit(pageSize * (currentPage - 1) + 1)
                 .get();
 
-            console.log(pageSize * (currentPage - 1) + 1);
-            console.log(first.docs.length - 1);
+            // console.log(pageSize * (currentPage - 1) + 1);
+            // console.log(first.docs.length - 1);
 
             try {
                 usersData = await UserModel._collectionRef
@@ -542,8 +542,6 @@ module.exports = {
                 let temp = designersDataArray[designersDataArray.findIndex(post => post.id === ArrObject[index].id)]
                 results.push(designersDataArray[designersDataArray.findIndex(post => post.id === ArrObject[index].id)])
             }
-
-            console.log(results);
 
             return res.status(200).json({
                 success: false,
